@@ -1,4 +1,4 @@
-# sem3-se-groupD-subscription
+# Subscription Manager
 A subscription manager application
 
 Anforderungen: 

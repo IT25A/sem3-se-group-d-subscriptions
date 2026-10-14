@@ -25,3 +25,24 @@ Anforderungen:
 21. Ausgaben sollen nach Datum, Betrag und Kategorie filterbar sein.
 22. Der Code soll modular aufgebaut sein, sodass einzelne Komponenten unabhängig geändert werden können.
 23. Die App soll automatisierte Tests für alle kritischen Funktionen enthalten.
+
+# Qualitätskontrolle - Tests 
+1. Anmeldung:
+    - Test User anlegen
+    - eine Anmeldung durchführen 
+    - Dafür: Daten Speicherung 
+2. Abo-Angabe:
+    - Anlegbar sein 
+    - CRUD
+    - Daten Speicherung 
+3. Abo-Vergleich: 
+    - Abos zugreifen 
+    - Daten aus Web ziehen 
+    - Mathematik validieren
+4. Webscraper: 
+    - Daten aus Web ziehen 
+    - Response überprüfen
+    --> Inhalt egal, nur Funktion testbar
+5. Filterbare Ausgabe -> nach Kategorien 
+    - Test Ausagben ertsellen 
+    - Prüfung richtiger Zuordnung 

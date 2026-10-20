@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import AuthPage from "./AuthPage";
+import AddSubscription from "./AddSubscription";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -48,6 +49,7 @@ function App() {
           </button>
         </div>
         {/* hier später das Dashboard */}
+        <AddSubscription onAdded={(sub) => console.log("Neu:", sub)} />
       </div>
   );
 }

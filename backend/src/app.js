@@ -3,6 +3,7 @@ const session = require("express-session")
 const cors = require("cors");
 const usersRouter = require("./modules/users/users.router");
 const authRouter = require("./modules/auth/auth.router");
+const subscriptionRouter = require("./modules/subscribtion/subscription.router");
 
 const app = express();
 
@@ -18,5 +19,6 @@ app.use(cors());
 
 app.use("/api/users", usersRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/subscriptions", subscriptionRouter);
 
 module.exports = app;

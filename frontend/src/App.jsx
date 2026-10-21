@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import AuthPage from "./AuthPage";
 import AddSubscription from "./AddSubscription";
+import SubscriptionList from "./SubscriptionList";
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refresh, setRefresh] = useState(0);
 
   // Beim Start prüfen, ob noch eine Session besteht
   useEffect(() => {
@@ -49,7 +51,8 @@ function App() {
           </button>
         </div>
         {/* hier später das Dashboard */}
-        <AddSubscription onAdded={(sub) => console.log("Neu:", sub)} />
+        <AddSubscription onAdded={() => setRefresh((r) => r + 1)} />
+        <SubscriptionList refresh={refresh} />
       </div>
   );
 }

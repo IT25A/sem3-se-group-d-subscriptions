@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const CATEGORIES = ["Streaming", "Software", "Gaming", "News", "Fitness", "Sonstiges"];
+const CATEGORIES = ["Video-Streaming", "Music-Streaming", "Software", "Gaming", "News", "Fitness", "Sonstiges"];
 
 function AddSubscription({ onAdded }) {
   const [form, setForm] = useState({ subscription: "", price: "", category: "" });

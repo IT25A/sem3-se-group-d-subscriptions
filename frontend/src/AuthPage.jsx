@@ -17,32 +17,38 @@ function AuthPage({ onLogin }) {
 				<h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">
 					Subscription Manager
 				</h1>
+				<div className="flex flex-row items-start gap-8">
+					<img
+						src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpapers.com%2Fimages%2Fhd%2Fpennywise-costume-png-oqs-pnygnlvyb62bassk.png&f=1&nofb=1&ipt=4e56694da52bf6d1a900a595fcd61e1ab71054aca407e83a12f3f82d5ed84871&ipo=images"
+						alt="logo"
+						className="h-48 w-auto"
+					/>
+					<div className="w-full max-w-sm">
+						<div className="flex mb-6" role="tablist">
+							<button
+									role="tab"
+									aria-selected={tab === "login"}
+									onClick={() => setTab("login")}
+									className={tabClass("login")}
+							>
+								Login
+							</button>
+							<button
+									role="tab"
+									aria-selected={tab === "register"}
+									onClick={() => setTab("register")}
+									className={tabClass("register")}
+							>
+								Registrieren
+							</button>
+						</div>
 
-				<div className="w-full max-w-sm">
-					<div className="flex mb-6" role="tablist">
-						<button
-								role="tab"
-								aria-selected={tab === "login"}
-								onClick={() => setTab("login")}
-								className={tabClass("login")}
-						>
-							Login
-						</button>
-						<button
-								role="tab"
-								aria-selected={tab === "register"}
-								onClick={() => setTab("register")}
-								className={tabClass("register")}
-						>
-							Registrieren
-						</button>
+						{tab === "login" ? (
+								<Login onLogin={onLogin} />
+						) : (
+								<Registration onSuccess={() => setTab("login")} />
+						)}
 					</div>
-
-					{tab === "login" ? (
-							<Login onLogin={onLogin} />
-					) : (
-							<Registration onSuccess={() => setTab("login")} />
-					)}
 				</div>
 			</div>
 	);

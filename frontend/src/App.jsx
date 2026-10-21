@@ -2,17 +2,22 @@ import { useEffect, useState } from "react";
 import AuthPage from "./AuthPage";
 import AddSubscription from "./AddSubscription";
 import SubscriptionList from "./SubscriptionList";
+import Budget from "./Budget";
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refresh, setRefresh] = useState(0);
+  const [budget, setBudget] = useState(null);
 
   // Beim Start prüfen, ob noch eine Session besteht
   useEffect(() => {
     fetch("/api/auth/user", { credentials: "include" })
         .then((res) => (res.ok ? res.json() : null))
-        .then((data) => setUser(data))
+        .then((data) => {
+          setUser(data);
+          if (data?.budget != null) setBudget(data.budget);
+        })
         .catch(() => setUser(null))
         .finally(() => setLoading(false));
   }, []);
@@ -51,6 +56,7 @@ function App() {
           </button>
         </div>
         {/* hier später das Dashboard */}
+        <Budget budget={budget} onBudgetChange={setBudget} />
         <AddSubscription onAdded={() => setRefresh((r) => r + 1)} />
         <SubscriptionList refresh={refresh} />
       </div>

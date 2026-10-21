@@ -1,5 +1,5 @@
 module.exports = (db) => {
-  db.run(`
+  db.exec(`
     CREATE TABLE IF NOT EXISTS Users (
       id        INTEGER PRIMARY KEY AUTOINCREMENT,
       username  TEXT    UNIQUE NOT NULL,

@@ -1,18 +1,11 @@
-const sqlite3 = require("sqlite3").verbose();
+const database = require("better-sqlite3");
 const { storage } = require("../configs/db");
 const createUsersTable = require("./tables/users");
-// Add future tables here: const createSubscriptionsTable = require("./tables/subscriptions");
+const createSubscriptionTable = require("./tables/subscriptionModel");
 
-const db = new sqlite3.Database(storage, (err) => {
-  if (err) {
-    console.error("Failed to connect to database:", err.message);
-    process.exit(1);
-  }
-  console.log("Connected to SQLite database");
-});
-
-db.serialize(() => {
-  createUsersTable(db);
-});
+const db = new database(storage)
+createUsersTable(db)
+createSubscriptionTable(db)
+console.log("Connected to database")
 
 module.exports = db;

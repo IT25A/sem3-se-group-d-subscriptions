@@ -1,83 +1,59 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import AuthPage from "./AuthPage";
+import AddSubscription from "./AddSubscription";
+import SubscriptionList from "./SubscriptionList";
 
 function App() {
-  const [form, setForm] = useState({ username: "", email: "", password: "" });
-  const [message, setMessage] = useState(null);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [refresh, setRefresh] = useState(0);
 
-  const handleChange = (e) =>
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  // Beim Start prüfen, ob noch eine Session besteht
+  useEffect(() => {
+    fetch("/api/auth/user", { credentials: "include" })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => setUser(data))
+        .catch(() => setUser(null))
+        .finally(() => setLoading(false));
+  }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage(null);
-    try {
-      const res = await fetch("/api/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setMessage({ type: "error", text: data.error });
-      } else {
-        setMessage({ type: "success", text: `User "${data.username}" created (id: ${data.id})` });
-        setForm({ username: "", email: "", password: "" });
-      }
-    } catch {
-      setMessage({ type: "error", text: "Could not reach the server" });
-    }
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+    setUser(null);
   };
 
+  if (loading) {
+    return (
+        <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
+          <p className="text-gray-500">Loading…</p>
+        </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthPage onLogin={setUser} />;
+  }
+
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col items-center pt-12 px-4">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">
-        Subscription Manager
-      </h1>
-
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm flex flex-col gap-4"
-      >
-        <input
-          name="username"
-          placeholder="Username"
-          value={form.username}
-          onChange={handleChange}
-          required
-          className="border border-gray-300 rounded px-3 py-2 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-600"
-        />
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          required
-          className="border border-gray-300 rounded px-3 py-2 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-600"
-        />
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          required
-          className="border border-gray-300 rounded px-3 py-2 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-600"
-        />
-        <button
-          type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded px-4 py-2 text-sm"
-        >
-          Create user
-        </button>
-      </form>
-
-      {message && (
-        <p className={`mt-4 text-sm ${message.type === "error" ? "text-red-500" : "text-green-600"}`}>
-          {message.text}
-        </p>
-      )}
-    </div>
+      <div className="min-h-screen bg-white dark:bg-gray-900 p-8">
+        <div className="flex items-center justify-between max-w-3xl mx-auto">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Hello {user.username}
+          </h1>
+          <button
+              onClick={handleLogout}
+              className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white rounded px-4 py-2 text-sm"
+          >
+            Logout
+          </button>
+        </div>
+        {/* hier später das Dashboard */}
+        <AddSubscription onAdded={() => setRefresh((r) => r + 1)} />
+        <SubscriptionList refresh={refresh} />
+      </div>
   );
 }
 

@@ -3,7 +3,7 @@ const service = require("./users.service");
 
 const router = Router();
 
-router.post("/", (req, res) => {
+router.post("/create", (req, res) => {
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {

@@ -15,7 +15,7 @@ function AuthPage({ onLogin }) {
 	return (
 			<div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col items-center pt-12 px-4">
 				<h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">
-					Subscription Manager
+					PENNYwise
 				</h1>
 				<div className="flex flex-row items-start gap-8">
 					<img

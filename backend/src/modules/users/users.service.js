@@ -29,4 +29,9 @@ function verifyCredentials(username, password) {
 	return {id: user.id, username: user.username, email: user.email};
 }
 
-module.exports = {createUser, ConflictError, findById, verifyCredentials, InvalidCredentialsError};
+function setBudget(budget, id) {
+	const info = db.prepare("UPDATE Users SET budget = ? WHERE id = ?").run(budget, id);
+	return { budget };
+}
+
+module.exports = {createUser, ConflictError, findById, verifyCredentials, InvalidCredentialsError, setBudget};

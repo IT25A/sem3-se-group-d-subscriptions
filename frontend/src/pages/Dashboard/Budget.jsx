@@ -1,4 +1,5 @@
 import { useState } from "react";
+import editIcon from "../../assets/edit.svg";
 
 function Budget({ budget, onBudgetChange }) {
   const [input, setInput] = useState("");
@@ -31,20 +32,20 @@ function Budget({ budget, onBudgetChange }) {
 
   if (budget != null && !editing) {
     return (
-      <div className="max-w-md mx-auto mt-6 p-4 bg-white dark:bg-gray-800 rounded-xl shadow">
-        <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-1">Budget</h2>
+      <div className="container-md mt-6 p-5 card">
+        <h2 className="text-base font-semibold t-primary mb-1">Budget</h2>
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+          <p className="text-sm t-secondary">
             Monatliches Budget:{" "}
-            <span className="font-semibold text-gray-900 dark:text-white">
+            <span className="font-semibold t-primary">
               {Number(budget).toFixed(2)} €
             </span>
           </p>
           <button
             onClick={() => { setInput(""); setEditing(true); }}
-            className="text-xs text-blue-600 hover:underline ml-4"
+            className="text-xs t-accent hover:underline ml-4"
           >
-            Ändern
+            <img src={editIcon} alt="Edit" className="icon icon-edit" />
           </button>
         </div>
       </div>
@@ -52,8 +53,8 @@ function Budget({ budget, onBudgetChange }) {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-6 p-4 bg-white dark:bg-gray-800 rounded-xl shadow">
-      <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-3">
+    <div className="container-md mt-6 p-4 card">
+      <h2 className="text-base font-semibold t-primary mb-3">
         {budget != null ? "Budget ändern" : "Budget setzen"}
       </h2>
       <form onSubmit={handleSubmit} className="flex items-center gap-2">
@@ -65,12 +66,12 @@ function Budget({ budget, onBudgetChange }) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           required
-          className="flex-1 border border-gray-300 dark:border-gray-600 rounded px-3 py-1.5 text-sm bg-white dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 input-field"
         />
         <button
           type="submit"
           disabled={loading}
-          className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium rounded px-3 py-1.5"
+          className="btn-primary"
         >
           {loading ? "…" : budget != null ? "Speichern" : "Setzen"}
         </button>
@@ -78,7 +79,7 @@ function Budget({ budget, onBudgetChange }) {
           <button
             type="button"
             onClick={() => setEditing(false)}
-            className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 px-2"
+            className="text-sm t-muted hover:underline px-2"
           >
             Abbrechen
           </button>

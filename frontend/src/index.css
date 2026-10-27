@@ -1,1 +1,81 @@
 @import "tailwindcss";
+
+@layer components {
+
+    /* ── Layout ──────────────────────────────────────────────── */
+    :root {
+        --width-content: 1140px;
+    }
+    .page-wrapper {
+        @apply min-h-screen bg-white dark:bg-gray-900;
+    }
+    .container-sm{
+        max-width: 512px;
+    }
+    .container-md,
+    .container-lg {
+        max-width: var(--width-content);
+        margin-inline: auto;
+    }
+
+    /* ── Surfaces ────────────────────────────────────────────── */
+    .card {
+        @apply bg-white dark:bg-gray-800 rounded-3xl shadow;
+    }
+
+    /* ── Typography ──────────────────────────────────────────── */
+    .t-primary   { @apply text-gray-900 dark:text-white; }
+    .t-secondary { @apply text-gray-600 dark:text-gray-300; }
+    .t-muted     { @apply text-gray-500 dark:text-gray-400; }
+    .t-faint     { @apply text-gray-400; }
+    .t-accent    { @apply text-blue-600 dark:text-blue-400; }
+    .t-error     { @apply text-red-500; }
+    .t-success   { @apply text-green-600 dark:text-green-400; }
+
+    /* ── Buttons ─────────────────────────────────────────────── */
+    .btn-primary {
+        @apply bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl px-4 py-2 text-sm
+        disabled:opacity-50;
+    }
+    .btn-secondary {
+        @apply bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600
+        dark:text-white rounded-xl px-4 py-2 text-sm;
+    }
+
+    /* ── Form controls ───────────────────────────────────────── */
+    .input-field {
+        @apply border border-gray-300 dark:border-gray-600
+        rounded-xl px-3 py-2
+        bg-white dark:bg-gray-700 dark:text-white
+        text-sm focus:outline-none focus:ring-2 focus:ring-blue-500;
+    }
+
+    /* ── Icon filters ────────────────────────────────────────── */
+    .icon {
+        @apply w-5 h-5;
+    }
+    .icon-white,
+    .icon-delete,
+    .icon-edit {
+        filter: brightness(0) invert(1);
+    }
+    .icon-delete:hover {
+        /* red-500 (#ef4444) */
+        filter: invert(37%) sepia(99%) saturate(749%) hue-rotate(323deg) brightness(104%) contrast(93%);
+    }
+    .icon-edit:hover {
+        /* muted gray (#6a7282) */
+        filter: invert(47%) sepia(5%) saturate(1445%) hue-rotate(182deg) brightness(91%) contrast(79%);
+    }
+
+    /* ── Pill chips (category/sort filters) ──────────────────── */
+    .chip {
+        @apply px-3 py-1 rounded-full text-xs font-medium transition-colors
+        bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300
+        hover:bg-gray-200 dark:hover:bg-gray-600;
+    }
+    .chip-active {
+        @apply px-3 py-1 rounded-full text-xs font-medium transition-colors
+        bg-blue-600 text-white;
+    }
+}

@@ -18,7 +18,7 @@ function createUser({ username, email, password }) {
 }
 
 function findById(id) {
-	return db.prepare("SELECT ID, USERNAME, EMAIL FROM Users WHERE ID = ?").get(id)
+	return db.prepare("SELECT ID, USERNAME, EMAIL, BUDGET FROM Users WHERE ID = ?").get(id)
 }
 
 function verifyCredentials(username, password) {
@@ -34,4 +34,10 @@ function setBudget(budget, id) {
 	return { budget };
 }
 
-module.exports = {createUser, ConflictError, findById, verifyCredentials, InvalidCredentialsError, setBudget};
+function updateBudget({ budget, id }) {
+	const info = db.prepare("UPDATE Users SET budget = ? WHERE id = ?")
+		.run(subscription, userId, id);
+	return info;
+}
+
+module.exports = {createUser, ConflictError, findById, verifyCredentials, InvalidCredentialsError, setBudget, updateBudget};

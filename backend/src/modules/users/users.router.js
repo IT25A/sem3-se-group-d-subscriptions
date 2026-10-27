@@ -24,8 +24,6 @@ router.post("/create", (req, res) => {
 });
 
 router.post("/budget", (req, res) => {
-
-
   if (!req.session.userId) {
     return res.status(401).json({ error: "not logged in" });
   }
@@ -43,5 +41,22 @@ router.post("/budget", (req, res) => {
   }
 });
 
+router.put("/budget", (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ error: "not logged in" });
+  }
+  const { budget } = req.body;
+  if (budget == null) {
+    return res.status(400).json({ error: "budget is required" });
+  }
+  try {
+    const result = service.setBudget(budget, req.session.userId);
+    res.status(200).json(result);
+  }
+  catch (err) {
+    console.error("update budget error:", err);
+    res.status(500).json({ error: "Failed to update budget" });
+  }
+})
 
 module.exports = router;

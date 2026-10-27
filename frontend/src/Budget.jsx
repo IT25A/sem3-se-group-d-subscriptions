@@ -3,14 +3,16 @@ import { useState } from "react";
 function Budget({ budget, onBudgetChange }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [editing, setEditing] = useState(false);
 
-  const handleSet = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input) return;
     setLoading(true);
     try {
+      const isUpdate = budget != null;
       const res = await fetch("/api/users/budget", {
-        method: "POST",
+        method: isUpdate ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ budget: parseFloat(input) }),
@@ -19,6 +21,7 @@ function Budget({ budget, onBudgetChange }) {
       const data = await res.json();
       onBudgetChange(data.budget);
       setInput("");
+      setEditing(false);
     } catch (err) {
       alert(err.message);
     } finally {
@@ -26,24 +29,34 @@ function Budget({ budget, onBudgetChange }) {
     }
   };
 
-  if (budget != null) {
+  if (budget != null && !editing) {
     return (
       <div className="max-w-md mx-auto mt-6 p-4 bg-white dark:bg-gray-800 rounded-xl shadow">
         <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-1">Budget</h2>
-        <p className="text-sm text-gray-600 dark:text-gray-300">
-          Monatliches Budget:{" "}
-          <span className="font-semibold text-gray-900 dark:text-white">
-            {Number(budget).toFixed(2)} €
-          </span>
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Monatliches Budget:{" "}
+            <span className="font-semibold text-gray-900 dark:text-white">
+              {Number(budget).toFixed(2)} €
+            </span>
+          </p>
+          <button
+            onClick={() => { setInput(""); setEditing(true); }}
+            className="text-xs text-blue-600 hover:underline ml-4"
+          >
+            Ändern
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="max-w-md mx-auto mt-6 p-4 bg-white dark:bg-gray-800 rounded-xl shadow">
-      <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-3">Budget setzen</h2>
-      <form onSubmit={handleSet} className="flex items-center gap-2">
+      <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-3">
+        {budget != null ? "Budget ändern" : "Budget setzen"}
+      </h2>
+      <form onSubmit={handleSubmit} className="flex items-center gap-2">
         <input
           type="number"
           min="0"
@@ -59,8 +72,17 @@ function Budget({ budget, onBudgetChange }) {
           disabled={loading}
           className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium rounded px-3 py-1.5"
         >
-          {loading ? "…" : "Setzen"}
+          {loading ? "…" : budget != null ? "Speichern" : "Setzen"}
         </button>
+        {budget != null && (
+          <button
+            type="button"
+            onClick={() => setEditing(false)}
+            className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 px-2"
+          >
+            Abbrechen
+          </button>
+        )}
       </form>
     </div>
   );

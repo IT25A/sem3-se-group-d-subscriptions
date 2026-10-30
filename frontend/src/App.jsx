@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import AuthPage from "./pages/Auth/AuthPage.jsx";
 import AddSubscription from "./pages/Dashboard/AddSubscription.jsx";
 import SubscriptionList from "./pages/Dashboard/SubscriptionList.jsx";
-import Budget from "./pages/Dashboard/Budget.jsx";
-import logoutIcon from "./assets/logout.svg";
-import settingsIcon from "./assets/cog.svg";
+import Dashboard from "./pages/Dashboard/Dashboard.jsx";
+import Sidebar from "./components/layout/Sidebar.jsx";
 
 function App() {
     const [user, setUser] = useState(null);
@@ -17,7 +16,7 @@ function App() {
             .then((res) => (res.ok ? res.json() : null))
             .then((data) => {
                 setUser(data);
-                if (data?.budget != null) setBudget(data.budget);
+                setBudget(data?.budget ?? null);
             })
             .catch(() => setUser(null))
             .finally(() => setLoading(false));
@@ -39,34 +38,28 @@ function App() {
         );
     }
 
+    const handleLogin = (data) => {
+        setUser(data);
+        setBudget(data?.budget ?? null);
+    };
+
     if (!user) {
-        return <AuthPage onLogin={setUser} />;
+        return <AuthPage onLogin={handleLogin} />;
     }
 
     return (
-        <div className="page-wrapper p-8">
-            <div className="flex items-center justify-between container-lg">
-                <h1 className="text-2xl font-bold t-primary">
-                    Hello {user.username}
-                </h1>
-                <div className="flex gap-2">
-                    <button
-                        // onClick={}
-                        className="btn-secondary"
-                    >
-                        <img src={settingsIcon} alt="Logout" className="icon icon-white" />
-                    </button>
-                    <button
-                        onClick={handleLogout}
-                        className="btn-secondary"
-                    >
-                        <img src={logoutIcon} alt="Logout" className="icon icon-white" />
-                    </button>
+        <div className="app-layout">
+            <Sidebar user={user} onLogout={handleLogout} />
+            <main className="main-content">
+                <div className="main-header container-md">
+                    <h1 className="text-2xl font-bold t-primary">
+                        Hello, {user.username}
+                    </h1>
                 </div>
-            </div>
-            <Budget budget={budget} onBudgetChange={setBudget} />
-            <SubscriptionList refresh={refresh} />
-            <AddSubscription onAdded={() => setRefresh((r) => r + 1)} />
+                <Dashboard budget={budget} onBudgetChange={setBudget} refresh={refresh} />
+                <SubscriptionList refresh={refresh} onDeleted={() => setRefresh((r) => r + 1)} />
+                <AddSubscription onAdded={() => setRefresh((r) => r + 1)} />
+            </main>
         </div>
     );
 }

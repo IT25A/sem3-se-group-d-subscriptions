@@ -194,16 +194,6 @@ function SubscriptionList({ refresh, onDeleted }) {
               : "Keine Abos für diesen Filter."}
           </p>
         )}
-
-        <p className="text-right text-sm t-muted mt-2">
-          {activeFilter !== "Alle" && (
-              <span className="mr-1 text-xs">({activeFilter})</span>
-          )}
-          Gesamt:{" "}
-          <span className="font-semibold t-primary">
-          {filtered.reduce((sum, s) => sum + Number(s.price), 0).toFixed(2)} €
-        </span>
-        </p>
       </div>
   );
 }

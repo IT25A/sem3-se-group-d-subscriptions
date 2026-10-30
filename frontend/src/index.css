@@ -1,13 +1,48 @@
 @import "tailwindcss";
 
+@font-face {
+    font-family: 'Montserrat';
+    src: url('./fonts/Montserrat.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+}
+
+:root {
+    --width-content: 1140px;
+    --gradient-bg: linear-gradient(to left, #0f0c29, #152331);
+    --gradient-emerald: linear-gradient(to top, #064e3b, #047857);
+    --color-btn-gray: #374151;
+    --color-btn-gray-hover: #4b5563;
+}
+
+html {
+    box-sizing: border-box;
+    position: relative;
+
+    &::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: var(--gradient-bg);
+        z-index: -1;
+    }
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    overscroll-behavior: none;
+    background: var(--gradient-bg) no-repeat;
+    min-height: 100vh;
+}
+
 @layer components {
 
     /* ── Layout ──────────────────────────────────────────────── */
-    :root {
-        --width-content: 1140px;
-    }
     .page-wrapper {
-        @apply min-h-screen bg-white dark:bg-gray-900;
+        @apply min-h-screen;
     }
     .container-sm{
         max-width: 512px;
@@ -21,6 +56,10 @@
     /* ── Surfaces ────────────────────────────────────────────── */
     .card {
         @apply bg-white dark:bg-gray-800 rounded-3xl shadow;
+        transition: box-shadow 200ms ease-in-out;
+    }
+    .card:hover {
+        box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     }
 
     /* ── Typography ──────────────────────────────────────────── */
@@ -28,19 +67,24 @@
     .t-secondary { @apply text-gray-600 dark:text-gray-300; }
     .t-muted     { @apply text-gray-500 dark:text-gray-400; }
     .t-faint     { @apply text-gray-400; }
-    .t-accent    { @apply text-blue-600 dark:text-blue-400; }
+    .t-accent    { @apply text-emerald-800 dark:text-emerald-700; }
     .t-error     { @apply text-red-500; }
     .t-success   { @apply text-green-600 dark:text-green-400; }
 
     /* ── Buttons ─────────────────────────────────────────────── */
     .btn-primary {
-        @apply bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl px-4 py-2 text-sm
+        @apply transform hover:scale-90 text-white font-medium rounded-xl px-4 py-2 text-sm cursor-pointer
         disabled:opacity-50;
+        background: var(--gradient-emerald);
+        transition: 0.25s;
     }
     .btn-secondary {
-        @apply bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600
+        @apply transform hover:scale-90 cursor-pointer
         dark:text-white rounded-xl px-4 py-2 text-sm;
+        background: var(--color-btn-gray);
+        transition: 0.25s;
     }
+    .btn-secondary:hover { background: var(--color-btn-gray-hover); }
 
     /* ── Form controls ───────────────────────────────────────── */
     .input-field {
@@ -52,7 +96,7 @@
 
     /* ── Icon filters ────────────────────────────────────────── */
     .icon {
-        @apply w-5 h-5;
+        @apply w-5 h-5 cursor-pointer;
     }
     .icon-white,
     .icon-delete,
@@ -70,12 +114,76 @@
 
     /* ── Pill chips (category/sort filters) ──────────────────── */
     .chip {
-        @apply px-3 py-1 rounded-full text-xs font-medium transition-colors
-        bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300
-        hover:bg-gray-200 dark:hover:bg-gray-600;
+        @apply px-3 py-1 rounded-full text-xs font-medium transition-colors text-gray-300 cursor-pointer;
+        background: var(--color-btn-gray);
     }
+    .chip:hover { background: var(--color-btn-gray-hover); }
     .chip-active {
-        @apply px-3 py-1 rounded-full text-xs font-medium transition-colors
-        bg-blue-600 text-white;
+        @apply px-3 py-1 rounded-full text-xs font-medium transition-colors text-white;
+        background: var(--gradient-emerald);
+    }
+
+    /* ── App shell (sidebar + main) ──────────────────────────── */
+    .app-layout {
+        @apply flex min-h-screen;
+        background: var(--gradient-bg);
+    }
+
+    /* ── Sidebar ─────────────────────────────────────────────── */
+    .sidebar {
+        @apply bg-gray-800 border-r border-r-gray-700 flex flex-col gap-6 p-6;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 20%;
+        height: 100vh;
+        overflow-y: auto;
+        backdrop-filter: blur(8px);
+        z-index: 10;
+    }
+    .sidebar-logo {
+        @apply flex items-center gap-3;
+    }
+    .sidebar-logo-img {
+        @apply w-16 h-16 object-contain;
+    }
+    .sidebar-logo-text {
+        @apply text-2xl font-bold tracking-wide text-white;
+    }
+    .sidebar-nav {
+        @apply flex flex-col gap-1 flex-1;
+    }
+    .sidebar-nav-item {
+        @apply w-full text-left px-4 py-2.5 rounded-xl text-sm text-gray-400 font-medium transition-colors flex items-center gap-3 cursor-pointer;
+        transition: 0.25s;
+    }
+    .sidebar-nav-item:hover {
+        @apply bg-gray-700 text-white transform scale-95;
+    }
+    .sidebar-nav-item.active {
+        @apply bg-linear-to-t from-emerald-900/50 to-emerald-700/50;
+        color: #6ee7b7;
+    }
+    .sidebar-footer {
+        @apply flex justify-between pt-4 border-t border-t-gray-700;
+    }
+    .sidebar-user {
+        @apply flex items-center gap-3;
+    }
+    .sidebar-avatar {
+        @apply w-8 h-8 text-white rounded-full flex items-center justify-center text-sm font-bold shrink-0;
+        background: var(--gradient-emerald);
+    }
+    .sidebar-username {
+        @apply text-sm font-medium truncate text-white;
+    }
+
+    /* ── Main content area ───────────────────────────────────── */
+    .main-content {
+        @apply flex-1 p-8 overflow-y-auto;
+        margin-left: 20%;
+    }
+    .main-header {
+        @apply flex items-center justify-between mb-6;
     }
 }

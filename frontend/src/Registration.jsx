@@ -12,7 +12,7 @@ function Registration ({ onSuccess }) {
 		e.preventDefault();
 		setMessage(null);
 		try {
-			const res = await fetch("/api/users/create", {
+			const res = await fetch("/api/users/", {
 				method: "POST",
 				headers: {"Content-Type": "application/json"},
 				body: JSON.stringify(form),

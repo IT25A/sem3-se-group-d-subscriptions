@@ -3,7 +3,7 @@ const service = require("./subscription.service");
 
 const router = Router();
 
-router.post("/add", (req, res) => {
+router.post("/", (req, res) => {
     if (!req.session.userId) {
         return res.status(401).json({ error: "not logged in" });
     }
@@ -28,7 +28,7 @@ router.post("/add", (req, res) => {
     }
 })
 
-router.get("/getAllSubscriptions", (req, res) => {
+router.get("/", (req, res) => {
     if (!req.session.userId) {
         return res.status(401).json({ error: "not logged in" });
     }
@@ -42,43 +42,6 @@ router.get("/getAllSubscriptions", (req, res) => {
         }
         console.error("get subscription error:", err);
         res.status(500).json({ error: "Failed to get subscription" });
-    }
-})
-
-router.get("/orderByCategory", (req, res) => {
-    if (!req.session.userId) {
-        return res.status(401).json({ error: "not logged in" });
-    }
-    const category = req.body;
-    const userId = req.session.userId;
-    try {
-        const subscriptionItem = service.getCategory({ userId, category });
-        res.status(200).json(subscriptionItem);
-    }
-    catch (err) {
-        if (err instanceof service.ConflictError) {
-            return res.status(409).json({ error: err.message });
-        }
-        console.error("get subscription error:", err);
-        res.status(500).json({ error: "Failed to get subscription" });
-    }
-})
-
-router.get("/orderByPriceDESC", (req, res) => {
-    if (!req.session.userId) {
-        return res.status(401).json({ error: "not logged in" });
-    }
-    const userId = req.session.userId;
-    try {
-        const subscriptionItem = service.orderByPrice({ userId });
-        res.status(200).json(subscriptionItem);
-    }
-    catch (err) {
-        if (err instanceof service.ConflictError) {
-            return res.status(409).json({ error: err.message });
-        }
-        console.error("order by price error:", err);
-        res.status(500).json({ error: "Failed to order by Price" });
     }
 })
 
@@ -107,12 +70,12 @@ router.put("/:id", (req, res) => {
     }
     const id = Number(req.params.id);
     const userId = req.session.userId;
-    const { subscription } = req.body;
-    if (!subscription) {
-        return res.status(400).json({ error: "subscription name is required" });
+    const  change  = req.body;
+    if (change.subscription === undefined && change.price === undefined && change.category === undefined) {
+        return res.status(400).json({error: "at least one field is required"});
     }
     try {
-        const result = service.updateSubscriptionName({ userId, id, subscription });
+        const result = service.updateSubscription({ userId, id, subscription: change.subscription, price: change.price, category: change.category });
         if (result.changes === 0) {
             return res.status(404).json({ error: "Subscription not found" });
         }

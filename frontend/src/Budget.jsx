@@ -10,9 +10,8 @@ function Budget({ budget, onBudgetChange }) {
     if (!input) return;
     setLoading(true);
     try {
-      const isUpdate = budget != null;
       const res = await fetch("/api/users/budget", {
-        method: isUpdate ? "PUT" : "POST",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ budget: parseFloat(input) }),

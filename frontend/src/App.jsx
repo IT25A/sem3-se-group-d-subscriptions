@@ -8,16 +8,12 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refresh, setRefresh] = useState(0);
-  const [budget, setBudget] = useState(null);
 
   // Beim Start prüfen, ob noch eine Session besteht
   useEffect(() => {
-    fetch("/api/auth/user", { credentials: "include" })
+    fetch("/api/auth/session", { credentials: "include" })
         .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          setUser(data);
-          if (data?.budget != null) setBudget(data.budget);
-        })
+        .then((data) => setUser(data))
         .catch(() => setUser(null))
         .finally(() => setLoading(false));
   }, []);
@@ -56,7 +52,10 @@ function App() {
           </button>
         </div>
         {/* hier später das Dashboard */}
-        <Budget budget={budget} onBudgetChange={setBudget} />
+        <Budget
+            budget={user.budget}
+            onBudgetChange={(b) => setUser((u) => ({ ...u, budget: b }))}
+        />
         <AddSubscription onAdded={() => setRefresh((r) => r + 1)} />
         <SubscriptionList refresh={refresh} />
       </div>

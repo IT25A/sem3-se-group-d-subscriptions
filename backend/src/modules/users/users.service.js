@@ -1,13 +1,15 @@
 const db = require("../../database");
+const bcrypt = require('bcrypt');
 
 class ConflictError extends Error {}
 class InvalidCredentialsError extends Error {}
 
 function createUser({ username, email, password }) {
+	const hashedPassword = bcrypt.hashSync(password, 10);
 	try {
 		const info = db
 				.prepare("INSERT INTO Users (username, email, password, budget) VALUES (?, ?, ?, 0)")
-				.run(username, email, password);
+				.run(username, email, hashedPassword);
 		return { id: info.lastInsertRowid, username: username, email: email, budget: 0 };
 	} catch (err) {
 		if (err.code === "SQLITE_CONSTRAINT_UNIQUE") {
@@ -23,7 +25,7 @@ function findById(id) {
 
 function verifyCredentials(username, password) {
 	const user = db.prepare("SELECT id, username, email, password, budget FROM Users WHERE USERNAME = ?").get(username)
-	if (!user || user.password !== password) {
+	if (!user || !bcrypt.compareSync(password, user.password)) {
 		throw new InvalidCredentialsError("Username or password invalid");
 	}
 	return {id: user.id, username: user.username, email: user.email, budget: user.budget};

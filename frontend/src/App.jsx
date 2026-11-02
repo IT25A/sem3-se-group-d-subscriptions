@@ -12,7 +12,7 @@ function App() {
     const [budget, setBudget] = useState(null);
 
     useEffect(() => {
-        fetch("/api/auth/user", { credentials: "include" })
+        fetch("/api/auth/session", { credentials: "include" })
             .then((res) => (res.ok ? res.json() : null))
             .then((data) => {
                 setUser(data);

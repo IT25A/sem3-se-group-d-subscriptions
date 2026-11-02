@@ -17,6 +17,8 @@ function SubscriptionList({ refresh, onDeleted }) {
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [newPrice, setNewPrice] = useState("");
+  const [newCategory, setNewCategory] = useState("");
 
   const handleDelete = async (id) => {
     setDeletingId(id);
@@ -38,6 +40,8 @@ function SubscriptionList({ refresh, onDeleted }) {
   const startEdit = (sub) => {
     setEditingId(sub.id);
     setEditValue(sub.subscription);
+    setNewPrice(String(sub.price));
+    setNewCategory(sub.category);
   };
 
   const handleUpdate = async (id) => {
@@ -54,7 +58,7 @@ function SubscriptionList({ refresh, onDeleted }) {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ subscription: newName }),
+        body: JSON.stringify({ subscription: newName, price: newPrice, category: newCategory }),
       });
       if (!res.ok) throw new Error("Fehler beim Speichern");
       setSubscriptions((prev) =>
@@ -67,7 +71,7 @@ function SubscriptionList({ refresh, onDeleted }) {
 
   useEffect(() => {
     setLoading(true);
-    fetch("/api/subscriptions/getAllSubscriptions", { credentials: "include" })
+    fetch("/api/subscriptions", { credentials: "include" })
         .then((res) => {
           if (!res.ok) throw new Error("Fehler beim Laden");
           return res.json();

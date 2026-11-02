@@ -13,7 +13,7 @@ function Dashboard({ budget, onBudgetChange, refresh }) {
     const [budgetLoading, setBudgetLoading] = useState(false);
 
     useEffect(() => {
-        fetch("/api/subscriptions/getAllSubscriptions", { credentials: "include" })
+        fetch("/api/subscriptions", { credentials: "include" })
             .then((res) => {
                 if (!res.ok) throw new Error("Fehler beim Laden");
                 return res.json();
@@ -35,7 +35,7 @@ function Dashboard({ budget, onBudgetChange, refresh }) {
         setBudgetLoading(true);
         try {
             const res = await fetch("/api/users/budget", {
-                method: budget != null ? "PUT" : "POST",
+                method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
                 body: JSON.stringify({ budget: parseFloat(budgetInput) }),

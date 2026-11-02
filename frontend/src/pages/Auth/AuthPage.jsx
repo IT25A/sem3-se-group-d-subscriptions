@@ -16,7 +16,7 @@ function AuthPage({ onLogin }) {
 	return (
 		<div className="page-wrapper flex flex-col items-center justify-center px-4">
 			<div className="w-full max-w-md">
-				<img src={logo} alt="logo" className={"m-auto w-60"} />
+				<img src={logo} alt="logo" className={"m-auto w-40 mb-5"} />
 				<h1 className="text-3xl font-bold t-primary mb-2 text-center">
 					PENNYwise
 				</h1>

@@ -13,7 +13,6 @@ router.post("/login",  (req, res) => {
 		req.session.regenerate((err) => {
 			if (err) return res.status(500).json({ error: "Login failed" });
 			req.session.userId = user.id;
-			console.log("LOGIN sessionID:", req.sessionID, "userId:", req.session.userId);
 			res.json(user);
 		});
 	}
@@ -34,13 +33,11 @@ router.post("/logout", (req, res) => {
 	})
 })
 
-router.get("/user", (req, res) => {
-	console.log("USER sessionID:", req.sessionID, "userId:", req.session.userId);
+router.get("/session", (req, res) => {
 	if (!req.session.userId) {
 		return res.status(401).json({ error: "no user logged in" });
 	}
 	let user = service.findById(req.session.userId)
-	console.log("USER findById:", user);
 	if (!user) {
 		return res.status(401).json({ error: "no user logged in" });
 	}

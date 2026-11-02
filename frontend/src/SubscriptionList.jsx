@@ -11,6 +11,8 @@ function SubscriptionList({ refresh, onDeleted }) {
   const [deletingId, setDeletingId] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
+  const [newPrice, setNewPrice] = useState("");
+  const [newCategory, setNewCategory] = useState("");
 
   const handleDelete = async (id) => {
     setDeletingId(id);
@@ -32,28 +34,36 @@ function SubscriptionList({ refresh, onDeleted }) {
   const startEdit = (sub) => {
     setEditingId(sub.id);
     setEditValue(sub.subscription);
+    setNewPrice(String(sub.price));
+    setNewCategory(sub.category);
   };
 
   const handleUpdate = async (id) => {
-    if (!editValue.trim()) {
-      setEditingId(null);
-      setEditValue("");
+    const name = editValue.trim();
+    const price = parseFloat(newPrice);
+
+    if (!name || !newCategory || !Number.isFinite(price) || price < 0) {
+      alert("Bitte Name, Preis und Kategorie korrekt ausfüllen");
       return;
     }
-    setEditingId(null);
-    const newName = editValue.trim();
-    setEditValue("");
+
     try {
       const res = await fetch(`/api/subscriptions/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ subscription: newName }),
+        body: JSON.stringify({ subscription: name, price, category: newCategory }),
       });
-      if (!res.ok) throw new Error("Fehler beim Speichern");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Fehler beim Speichern");
+
       setSubscriptions((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, subscription: newName } : s))
+          prev.map((s) =>
+              s.id === id ? { ...s, subscription: name, price, category: newCategory } : s
+          )
       );
+      setEditingId(null);
+      setEditValue("");
     } catch (err) {
       alert(err.message);
     }
@@ -61,7 +71,7 @@ function SubscriptionList({ refresh, onDeleted }) {
 
   useEffect(() => {
     setLoading(true);
-    fetch("/api/subscriptions/getAllSubscriptions", { credentials: "include" })
+    fetch("/api/subscriptions", { credentials: "include" })
       .then((res) => {
         if (!res.ok) throw new Error("Fehler beim Laden");
         return res.json();
@@ -141,30 +151,82 @@ function SubscriptionList({ refresh, onDeleted }) {
             className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg shadow text-sm"
           >
             <div className="flex-1 min-w-0">
+
               {editingId === sub.id ? (
-                <input
-                  autoFocus
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") { e.preventDefault(); handleUpdate(sub.id); }
-                    if (e.key === "Escape") { setEditingId(null); setEditValue(""); }
-                  }}
-                  onBlur={() => {
-                    if (editingId === sub.id) handleUpdate(sub.id);
-                  }}
-                  className="border border-blue-400 rounded px-2 py-0.5 text-sm bg-white dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-                />
+                  <div className="flex flex-col gap-2 w-full">
+                    {/* Name */}
+                    <input
+                        autoFocus
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        placeholder="Name des Abos"
+                        className="border border-blue-400 rounded px-2 py-1 text-sm
+                 bg-white dark:bg-gray-700 dark:text-white w-full"
+                    />
+
+                    {/* Preis */}
+                    <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={newPrice}
+                        onChange={(e) => setNewPrice(e.target.value)}
+                        placeholder="Preis in Euro"
+                        className="border border-blue-400 rounded px-2 py-1 text-sm
+                 bg-white dark:bg-gray-700 dark:text-white w-full"
+                    />
+
+                    {/* Kategorie */}
+                    <select
+                        value={newCategory}
+                        onChange={(e) => setNewCategory(e.target.value)}
+                        className="border border-blue-400 rounded px-2 py-1 text-sm
+                 bg-white dark:bg-gray-700 dark:text-white w-full"
+                    >
+                      <option value="">Kategorie auswählen</option>
+                      {CATEGORIES.map((cat) => (
+                          <option key={cat} value={cat}>
+                            {cat}
+                          </option>
+                      ))}
+                    </select>
+
+                    {/* Aktionen */}
+                    <div className="flex gap-2">
+                      <button
+                          onClick={() => handleUpdate(sub.id)}
+                          className="bg-blue-600 text-white rounded px-3 py-1 text-xs
+                   hover:bg-blue-700"
+                      >
+                        Speichern
+                      </button>
+
+                      <button
+                          onClick={() => {
+                            setEditingId(null);
+                            setEditValue("");
+                          }}
+                          className="bg-gray-200 dark:bg-gray-600 rounded px-3 py-1
+                   text-xs text-gray-700 dark:text-white"
+                      >
+                        Abbrechen
+                      </button>
+                    </div>
+                  </div>
               ) : (
-                <button
-                  onClick={() => startEdit(sub)}
-                  className="font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-left"
-                  title="Umbenennen"
-                >
-                  {sub.subscription}
-                </button>
+                  <button
+                      onClick={() => startEdit(sub)}
+                      className="font-medium text-gray-900 dark:text-white
+               hover:text-blue-600 dark:hover:text-blue-400
+               transition-colors text-left"
+                      title="Abo bearbeiten"
+                  >
+                    {sub.subscription}
+                  </button>
               )}
-              <span className="ml-2 text-xs text-gray-400">{sub.category}</span>
+              <span className="ml-2 text-xs text-gray-400">
+                {editingId !== sub.id && sub.category}
+              </span>
             </div>
             <div className="flex items-center gap-3">
               <span className="text-blue-600 dark:text-blue-400 font-semibold">

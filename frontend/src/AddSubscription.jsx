@@ -17,7 +17,7 @@ function AddSubscription({ onAdded }) {
     setStatus(null);
 
     try {
-      const res = await fetch("/api/subscriptions/add", {
+      const res = await fetch("/api/subscriptions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

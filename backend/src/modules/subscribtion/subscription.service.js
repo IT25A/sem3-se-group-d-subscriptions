@@ -24,37 +24,24 @@ function getSubscription({ userId }) {
     }
 }
 
-function getCategory({ userId, category }) {
-    try {
-        db.prepare("SELECT id, subscription, price, category FROM SubscriptionModel WHERE userid = ? AND category = ?")
-            .all(userId, category);
-        return true;
-    } catch (err) {
-        throw new Error("Filtered by subscription failed");
-    }
-
-}
-
-function orderByPrice({ userId }) {
-    try {
-        db.prepare("SELECT id, subscription, price, category FROM SubscriptionModel WHERE userid = ? ORDER BY price DESC")
-            .all(userId);
-        return true;
-    } catch (err) {
-        throw new Error("Ordering by price failed");
-    }
-}
-
 function deleteSubscription({ userId, id }) {
-    db.prepare("DELETE FROM SubscriptionModel WHERE userid = ? AND id = ?")
-        .run(userId, id);
-    return true;
+    try {
+        const info = db.prepare("DELETE FROM SubscriptionModel WHERE userid = ? AND id = ?")
+            .run(userId, id);
+        return info;
+    } catch (err) {
+        throw new Error("Delete Subscription failed");
+    }
 }
 
-function updateSubscriptionName({ userId, id, subscription }) {
-    const info = db.prepare("UPDATE SubscriptionModel SET subscription = ? WHERE userid = ? AND id = ?")
-        .run(subscription, userId, id);
-    return info;
+function updateSubscription({ userId, id, subscription, price, category }) {
+    try {
+        const info = db.prepare("UPDATE SubscriptionModel SET subscription = ?, price = ?, category = ? WHERE userid = ? AND id = ?")
+            .run(subscription, price, category, userId, id);
+        return info;
+    } catch (err) {
+        throw new Error("Update Subscription failed");
+    }
 }
 
-module.exports = {ConflictError, createSubscription, getSubscription, getCategory, orderByPrice, deleteSubscription, updateSubscriptionName};
+module.exports = {ConflictError, createSubscription, getSubscription, deleteSubscription, updateSubscription};

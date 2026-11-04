@@ -1,5 +1,5 @@
 module.exports = (db) => {
-    db.exec(`/Users/I766385/Downloads/cherrio/AudioBook
+    db.exec(`
         CREATE TABLE IF NOT EXISTS SubscriptionModel (
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
             userid          INTEGER REFERENCES Users(id),

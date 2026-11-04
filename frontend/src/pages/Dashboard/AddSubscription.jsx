@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const CATEGORIES = ["Video-Streaming", "Music-Streaming", "Software", "Gaming", "News", "Fitness", "Sonstiges"];
+const CATEGORIES = ["Video-Streaming", "Music-Streaming", "Software", "Gaming", "News", "Fitness", "Other"];
 
 function AddSubscription({ onAdded }) {
   const [form, setForm] = useState({ subscription: "", price: "", category: "" });
@@ -41,12 +41,7 @@ function AddSubscription({ onAdded }) {
   };
 
   return (
-      <div className="container-md mt-8 p-6 card">
-        <h2 className="text-xl font-semibold t-primary mb-4">
-          Subscription anlegen
-        </h2>
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
             <label className="block text-sm t-secondary mb-1">Name</label>
             <input
@@ -54,13 +49,13 @@ function AddSubscription({ onAdded }) {
                 value={form.subscription}
                 onChange={handleChange}
                 required
-                placeholder="z.B. Netflix"
+                placeholder="e.g. Netflix"
                 className="w-full input-field"
             />
           </div>
 
           <div>
-            <label className="block text-sm t-secondary mb-1">Preis (€)</label>
+            <label className="block text-sm t-secondary mb-1">Price (€)</label>
             <input
                 name="price"
                 type="number"
@@ -69,13 +64,13 @@ function AddSubscription({ onAdded }) {
                 value={form.price}
                 onChange={handleChange}
                 required
-                placeholder="z.B. 12.99"
+                placeholder="e.g. 12.99"
                 className="w-full input-field"
             />
           </div>
 
           <div>
-            <label className="block text-sm t-secondary mb-1">Kategorie</label>
+            <label className="block text-sm t-secondary mb-1">Category</label>
             <select
                 name="category"
                 value={form.category}
@@ -83,7 +78,7 @@ function AddSubscription({ onAdded }) {
                 required
                 className="w-full input-field"
             >
-              <option value="">Bitte wählen…</option>
+              <option value="">Please choose…</option>
               {CATEGORIES.map((c) => (
                   <option key={c} value={c}>{c}</option>
               ))}
@@ -102,10 +97,9 @@ function AddSubscription({ onAdded }) {
               disabled={loading}
               className="btn-primary"
           >
-            {loading ? "Wird angelegt…" : "Anlegen"}
+            {loading ? "Adding…" : "Add"}
           </button>
-        </form>
-      </div>
+      </form>
   );
 }
 

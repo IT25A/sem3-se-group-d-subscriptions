@@ -3,17 +3,17 @@ import settingsIcon from "../../assets/cog.svg";
 import logoutIcon from "../../assets/logout.svg";
 import dashboardIcon from "../../assets/dashboard.svg";
 import subscriptionIcon from "../../assets/currency.svg";
-import budgetIcon from "../../assets/wallet.svg";
 import analyticsIcon from "../../assets/chart.svg";
+import compareIcon from "../../assets/compare.svg";
 import notificationIcon from "../../assets/notification.svg";
 
-function Sidebar({ user, onLogout }) {
+function Sidebar({ user, onLogout, activePage, onNavigate }) {
     const navItems = [
-        { icon: dashboardIcon, label: "Dashboard", active: true },
-        { icon: subscriptionIcon, label: "Subscriptions", active: false },
-        { icon: budgetIcon, label: "Budget", active: false },
-        { icon: analyticsIcon, label: "Analytics", active: false },
-        { icon: notificationIcon, label: "Notifications", active: false },
+        { icon: dashboardIcon, label: "Dashboard" },
+        { icon: subscriptionIcon, label: "Subscriptions" },
+        { icon: analyticsIcon, label: "Analytics" },
+        { icon: compareIcon, label: "Compare" },
+        { icon: notificationIcon, label: "Notifications" },
     ];
 
     return (
@@ -27,7 +27,8 @@ function Sidebar({ user, onLogout }) {
                 {navItems.map((item) => (
                     <button
                         key={item.label}
-                        className={item.active ? "sidebar-nav-item active" : "sidebar-nav-item"}
+                        onClick={() => onNavigate?.(item.label)}
+                        className={activePage === item.label ? "sidebar-nav-item active" : "sidebar-nav-item"}
                     >
                         <img src={item.icon} alt={item.label} className="icon icon-white"/>
                         {item.label}

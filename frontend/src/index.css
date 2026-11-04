@@ -85,6 +85,10 @@ body {
         transition: 0.25s;
     }
     .btn-secondary:hover { background: var(--color-btn-gray-hover); }
+    .btn-close {
+        @apply transform hover:scale-90 text-gray-500 hover:text-gray-300 text-xl leading-none cursor-pointer;
+        transition: 0.25s;
+    }
 
     /* ── Form controls ───────────────────────────────────────── */
     .input-field {
@@ -96,12 +100,17 @@ body {
 
     /* ── Icon filters ────────────────────────────────────────── */
     .icon {
-        @apply w-5 h-5 cursor-pointer;
+        @apply w-5 h-5;
     }
     .icon-white,
     .icon-delete,
     .icon-edit {
         filter: brightness(0) invert(1);
+    }
+    .icon-delete,
+    .icon-edit {
+        @apply transform hover:scale-95 cursor-pointer;
+        transition: 0.25s;
     }
     .icon-delete:hover {
         /* red-500 (#ef4444) */
@@ -119,7 +128,7 @@ body {
     }
     .chip:hover { background: var(--color-btn-gray-hover); }
     .chip-active {
-        @apply px-3 py-1 rounded-full text-xs font-medium transition-colors text-white;
+        @apply px-3 py-1 rounded-full text-xs font-medium transition-colors text-white cursor-pointer;
         background: var(--gradient-emerald);
     }
 
@@ -145,7 +154,7 @@ body {
         @apply flex items-center gap-3;
     }
     .sidebar-logo-img {
-        @apply w-16 h-16 p-1.5 object-contain;
+        @apply w-14 h-14 object-contain;
     }
     .sidebar-logo-text {
         @apply text-2xl font-bold tracking-wide text-white;

@@ -56,14 +56,16 @@ function Dashboard({ budget, onBudgetChange, refresh }) {
         const [euros, cents] = value.toFixed(2).split(".");
         return (
             <>
-                {euros}.<span className="text-base font-bold">{cents}</span>
+                {euros}<span className="text-base font-bold">.{cents}</span>
             </>
         );
     };
 
     return (
         <div className="container-md mt-6">
-            <h2 className="text-xl font-semibold t-primary mb-4">Übersicht</h2>
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold t-primary">Overview</h2>
+            </div>
 
             {error && <p className="t-error text-sm mb-4">{error}</p>}
 
@@ -77,7 +79,7 @@ function Dashboard({ budget, onBudgetChange, refresh }) {
                         <img src={monthIcon} alt="Monthly" className="icon icon-white" />
                     </div>
                     <div>
-                        <p className="text-xs t-muted mb-1">Monatliche Kosten</p>
+                        <p className="text-xs t-muted mb-1">Monthly costs</p>
                         {loading ? (
                             <p className="text-2xl font-bold t-primary">…</p>
                         ) : (
@@ -98,7 +100,7 @@ function Dashboard({ budget, onBudgetChange, refresh }) {
                         <img src={yearIcon} alt="Yearly" className="icon icon-white" />
                     </div>
                     <div>
-                        <p className="text-xs t-muted mb-1">Jährliche Kosten</p>
+                        <p className="text-xs t-muted mb-1">Yearly costs</p>
                         {loading ? (
                             <p className="text-2xl font-bold t-primary">…</p>
                         ) : (
@@ -119,7 +121,7 @@ function Dashboard({ budget, onBudgetChange, refresh }) {
                         <img src={walletIcon} alt="budget" className="icon icon-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-xs t-muted mb-1">Monatliches Budget</p>
+                        <p className="text-xs t-muted mb-1">Monthly budget</p>
                         {editingBudget ? (
                             <form onSubmit={handleBudgetSubmit} className="flex items-center gap-2 mt-1">
                                 <input
@@ -139,7 +141,7 @@ function Dashboard({ budget, onBudgetChange, refresh }) {
                                 <button
                                     type="button"
                                     onClick={() => setEditingBudget(false)}
-                                    className="text-sm t-muted hover:underline"
+                                    className="btn-close"
                                 >
                                     ✕
                                 </button>

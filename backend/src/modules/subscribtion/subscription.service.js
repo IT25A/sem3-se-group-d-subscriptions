@@ -1,45 +1,48 @@
-const db = require("../../database");
+const { run, get, all } = require("../../database");
 
 class ConflictError extends Error {}
 
-function createSubscription({ userId, subscription, price, category }) {
+async function createSubscription({ userId, subscription, price, category }) {
     try {
-        const info = db.prepare("INSERT INTO SubscriptionModel (userid, subscription, price, category) VALUES (?, ?, ?, ?)")
-            .run(userId, subscription, price, category);
-        return { id: info.lastInsertRowid, subscription, price, category };
+        const {lastID} = await run("INSERT INTO SubscriptionModel (userid, subscription, price, category) VALUES (?, ?, ?, ?)",
+            [userId, subscription, price, category]);
+        return { id: lastID, subscription, price, category };
     } catch (err) {
-        if (err.code === "SQLITE_CONSTRAINT_UNIQUE") {
+        if (err.message.includes("UNIQUE constraint failed")) {
             throw new ConflictError("Subscription already exists");
         }
         throw err;
     }
 }
 
-function getSubscription({ userId }) {
+async function getSubscription({ userId }) {
     try {
-        return db.prepare("SELECT id, subscription, price, category FROM SubscriptionModel WHERE userid = ?")
-            .all(userId);
+        return await all("SELECT id, subscription, price, category FROM SubscriptionModel WHERE userid = ?",
+            [userId]);
     } catch (err) {
         throw new Error("Get Subscription failed");
     }
 }
 
-function deleteSubscription({ userId, id }) {
+async function deleteSubscription({ userId, id }) {
     try {
-        const info = db.prepare("DELETE FROM SubscriptionModel WHERE userid = ? AND id = ?")
-            .run(userId, id);
-        return info;
+        const {changes} = await run("DELETE FROM SubscriptionModel WHERE userid = ? AND id = ?",
+            [userId, id]);
+        return {id, changes};
     } catch (err) {
         throw new Error("Delete Subscription failed");
     }
 }
 
-function updateSubscription({ userId, id, subscription, price, category }) {
+async function updateSubscription({ userId, id, subscription, price, category }) {
     try {
-        const info = db.prepare("UPDATE SubscriptionModel SET subscription = ?, price = ?, category = ? WHERE userid = ? AND id = ?")
-            .run(subscription, price, category, userId, id);
-        return info;
+        const {changes} = await run("UPDATE SubscriptionModel SET subscription = ?, price = ?, category = ? WHERE userid = ? AND id = ?",
+            [subscription, price, category, userId, id]);
+        return {id, changes};
     } catch (err) {
+        if (err.message.includes("UNIQUE constraint failed")) {
+            throw new ConflictError("Subscription already exists");
+        }
         throw new Error("Update Subscription failed");
     }
 }

@@ -45,25 +45,30 @@ function SubscriptionList({ refresh, onDeleted }) {
   };
 
   const handleUpdate = async (id) => {
-    if (!editValue.trim()) {
-      setEditingId(null);
-      setEditValue("");
-      return;
-    }
-    setEditingId(null);
-    const newName = editValue.trim();
-    setEditValue("");
+    const current = subscriptions.find((s) => s.id === id);
+    if (!current) return;
+
+    const subscription = editValue.trim() || current.subscription;
+    const price = newPrice === "" ? current.price : parseFloat(newPrice);
+    const category = newCategory || current.category;
+
     try {
       const res = await fetch(`/api/subscriptions/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ subscription: newName, price: newPrice, category: newCategory }),
+        body: JSON.stringify({ subscription, price, category }),
       });
-      if (!res.ok) throw new Error("Fehler beim Speichern");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Fehler beim Speichern");
+
       setSubscriptions((prev) =>
-          prev.map((s) => (s.id === id ? { ...s, subscription: newName } : s))
+          prev.map((s) => (s.id === id ? { ...s, subscription, price, category } : s))
       );
+      setEditingId(null);
+      setEditValue("");
+      setNewPrice("");
+      setNewCategory("");
     } catch (err) {
       alert(err.message);
     }
@@ -155,9 +160,6 @@ function SubscriptionList({ refresh, onDeleted }) {
                             onKeyDown={(e) => {
                               if (e.key === "Enter") { e.preventDefault(); handleUpdate(sub.id); }
                               if (e.key === "Escape") { setEditingId(null); setEditValue(""); }
-                            }}
-                            onBlur={() => {
-                              if (editingId === sub.id) handleUpdate(sub.id);
                             }}
                             className="border border-blue-400 rounded px-2 py-0.5 text-sm bg-white dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />

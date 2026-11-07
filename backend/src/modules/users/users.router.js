@@ -3,15 +3,21 @@ const service = require("./users.service");
 
 const router = Router();
 
-router.post("/", (req, res) => {
-  const { username, email, password } = req.body;
+router.post("/", async (req, res) => {
+  const username = req.body.username?.trim();
+  const email = req.body.email?.trim().toLowerCase();
+  const password = req.body.password;
 
   if (!username || !email || !password) {
-    return res.status(400).json({ error: "username, email and password are required" });
+    return res.status(400).json({ error: "Username, email and password are required" });
+  }
+
+  if (typeof username !== "string" || typeof email !== "string" || typeof password !== "string") {
+    return res.status(400).json({ error: "Illegal username or password" });
   }
 
   try {
-    const user = service.createUser({username, email, password});
+    const user = await service.createUser({username, email, password});
     res.status(201).json(user);
   }
   catch (err) {
@@ -23,20 +29,23 @@ router.post("/", (req, res) => {
   }
 });
 
-router.put("/budget", (req, res) => {
+router.put("/budget", async (req, res) => {
   if (!req.session.userId) {
-    return res.status(401).json({ error: "not logged in" });
+    return res.status(401).json({ error: "User not logged in" });
   }
   const { budget } = req.body;
   if (budget == null) {
-    return res.status(400).json({ error: "budget is required" });
+    return res.status(400).json({ error: "Budget is required" });
   }
-  if (budget < 0 || typeof budget != "number") {
-    return res.status(400).json({ error: "budget is invalid" });
+  if ( typeof budget != "number" || budget < 0) {
+    return res.status(400).json({ error: "Budget is invalid" });
   }
   try {
-    service.setBudget(budget, req.session.userId);
-    res.status(200).json({budget});
+    const result = await service.setBudget(budget, req.session.userId);
+    if (result.changes === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.status(200).json({ budget });
   }
   catch (err) {
     console.error("update budget error:", err);

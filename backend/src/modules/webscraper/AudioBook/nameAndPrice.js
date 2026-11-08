@@ -1,17 +1,19 @@
-import * as cheerio from 'cheerio';
+const cheerio = require('cheerio');
 
-const response = await fetch('https://www.abo24.de/hoerbuch-abo-vergleich');;
-const html = await response.text();
-const $ = cheerio.load(html);
+async function getAudioBookNamesAndPrices() {
+    const response = await fetch('https://www.abo24.de/hoerbuch-abo-vergleich');
+    const html = await response.text();
+    const $ = cheerio.load(html);
 
-const names = $('[itemprop="brand"] [itemprop="name"]') 
-    .map((_, el) => $(el).attr('content'))
-    .get();
+    const names = $('[itemprop="brand"] [itemprop="name"]')
+        .map((_, el) => $(el).attr('content'))
+        .get();
 
+    const prices = $('[itemprop="price"]')
+        .map((_, el) => $(el).attr('content'))
+        .get();
 
+    return { names, prices };
+}
 
-const prices = $('[itemprop="price"]') 
-    .map((_, el) => $(el).attr('content'))
-    .get();
-
-export { names, prices };
+module.exports = { getAudioBookNamesAndPrices };

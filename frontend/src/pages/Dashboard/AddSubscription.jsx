@@ -2,8 +2,13 @@ import { useState } from "react";
 
 const CATEGORIES = ["Video-Streaming", "Music-Streaming", "Software", "Gaming", "News", "Fitness", "Other"];
 
-function AddSubscription({ onAdded }) {
-  const [form, setForm] = useState({ subscription: "", price: "", category: "" });
+function AddSubscription({ onAdded, initialValues, onUpdated }) {
+  const isEdit = !!initialValues;
+  const [form, setForm] = useState(
+    initialValues
+      ? { subscription: initialValues.subscription, price: String(initialValues.price), category: initialValues.category }
+      : { subscription: "", price: "", category: "" }
+  );
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -17,21 +22,36 @@ function AddSubscription({ onAdded }) {
     setStatus(null);
 
     try {
-      const res = await fetch("/api/subscriptions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ ...form, price: parseFloat(form.price) }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setStatus({ error: data.error || "Fehler beim Anlegen" });
+      if (isEdit) {
+        const res = await fetch(`/api/subscriptions/${initialValues.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ ...form, price: parseFloat(form.price) }),
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          setStatus({ error: data.error || "Fehler beim Speichern" });
+        } else {
+          onUpdated?.({ ...initialValues, ...form, price: parseFloat(form.price) });
+        }
       } else {
-        setStatus({ success: `"${data.subscription}" wurde angelegt (ID: ${data.id})` });
-        setForm({ subscription: "", price: "", category: "" });
-        onAdded?.(data);
+        const res = await fetch("/api/subscriptions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ ...form, price: parseFloat(form.price) }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setStatus({ error: data.error || "Fehler beim Anlegen" });
+        } else {
+          setStatus({ success: `"${data.subscription}" wurde angelegt (ID: ${data.id})` });
+          setForm({ subscription: "", price: "", category: "" });
+          onAdded?.(data);
+        }
       }
     } catch {
       setStatus({ error: "Netzwerkfehler" });
@@ -97,7 +117,7 @@ function AddSubscription({ onAdded }) {
               disabled={loading}
               className="btn-primary"
           >
-            {loading ? "Adding…" : "Add"}
+            {loading ? (isEdit ? "Saving…" : "Adding…") : (isEdit ? "Save" : "Add")}
           </button>
       </form>
   );

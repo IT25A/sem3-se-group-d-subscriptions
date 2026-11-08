@@ -3,6 +3,7 @@ import AuthPage from "./pages/Auth/AuthPage.jsx";
 import SubscriptionList from "./pages/Dashboard/SubscriptionList.jsx";
 import Dashboard from "./pages/Dashboard/Dashboard.jsx";
 import Analytics from "./pages/Analytics/AnalyticsPage.jsx";
+import ComparisonPage from "./pages/Comparison/ComparisonPage.jsx";
 import Sidebar from "./components/layout/Sidebar.jsx";
 
 function App() {
@@ -71,15 +72,18 @@ function App() {
                         />
                     </>
                 )}
-                {activePage === "Analytics" && (
-                    <Analytics budget={budget} refresh={refresh} />
-                )}
                 {activePage === "Subscriptions" && (
                     <SubscriptionList
                         refresh={refresh}
                         onDeleted={() => setRefresh((r) => r + 1)}
                         onAdded={() => setRefresh((r) => r + 1)}
                     />
+                )}
+                {activePage === "Analytics" && (
+                    <Analytics budget={budget} refresh={refresh} />
+                )}
+                {activePage === "Compare" && (
+                    <ComparisonPage />
                 )}
             </main>
         </div>

@@ -11,6 +11,7 @@ const db = new sqlite3.Database(storage, (err) => {
 });
 
 db.serialize();
+db.exec("PRAGMA foreign_keys = ON")
 createUsersTable(db)
 createSubscriptionTable(db)
 console.log("Connected to database")

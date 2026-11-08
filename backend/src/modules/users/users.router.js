@@ -4,20 +4,22 @@ const service = require("./users.service");
 const router = Router();
 
 router.post("/", async (req, res) => {
-  const username = req.body.username?.trim();
-  const email = req.body.email?.trim().toLowerCase();
-  const password = req.body.password;
+  const { username, email, password } = req.body ?? {};
 
   if (!username || !email || !password) {
     return res.status(400).json({ error: "Username, email and password are required" });
   }
 
-  if (typeof username !== "string" || typeof email !== "string" || typeof password !== "string") {
-    return res.status(400).json({ error: "Illegal username or password" });
+  const name = typeof username === "string" ? username.trim() : "";
+  const mail = typeof email === "string" ? email.trim() : "";
+  const pass = typeof password === "string" ? password.trim() : "";
+
+  if (!name || !mail || !pass) {
+    return res.status(400).json({ error: "Illegal username, email or password" });
   }
 
   try {
-    const user = await service.createUser({username, email, password});
+    const user = await service.createUser({name, mail, pass});
     res.status(201).json(user);
   }
   catch (err) {
@@ -50,6 +52,28 @@ router.put("/budget", async (req, res) => {
   catch (err) {
     console.error("update budget error:", err);
     res.status(500).json({ error: "Failed to update budget" });
+  }
+})
+
+router.delete("/", async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ error: "User not logged in" });
+  }
+
+  try {
+    const result = await service.deleteUser(req.session.userId);
+    if (result.changes === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    req.session.destroy((err) => {
+      if (err) return res.status(500).json({ error: "Failed to end session" });
+      res.clearCookie("connect.sid");
+      res.status(200).json({ success: true });
+    })
+  }
+  catch (err) {
+    console.error("Delete user error:", err);
+    res.status(500).json({ error: "Failed to delete user" });
   }
 })
 

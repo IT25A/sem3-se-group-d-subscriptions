@@ -66,7 +66,7 @@ router.delete("/:id", async (req, res) => {
         res.status(200).json({ success: true });
     }
     catch (err) {
-        console.error("delete subscription error:", err);
+        console.error("Delete subscription error:", err);
         res.status(500).json({ error: "Failed to delete subscription" });
     }
 })
@@ -96,7 +96,7 @@ router.put("/:id", async (req, res) => {
     }
     catch (err) {
         if (err instanceof service.ConflictError) {
-            return res.status(409).json({ error: "Subscription name already exists" });
+            return res.status(409).json({ error: err.message });
         }
         console.error("Update subscription error:", err);
         res.status(500).json({ error: "Failed to update subscription" });

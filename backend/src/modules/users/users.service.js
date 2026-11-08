@@ -35,4 +35,10 @@ async function setBudget(budget, id) {
 	return {budget, changes};
 }
 
-module.exports = {createUser, ConflictError, findById, verifyCredentials, InvalidCredentialsError, setBudget};
+async function deleteUser( id ) {
+		const {changes} = await run("DELETE FROM Users WHERE id = ?",
+				[id]);
+		return {id, changes};
+}
+
+module.exports = {createUser, ConflictError, findById, verifyCredentials, InvalidCredentialsError, setBudget, deleteUser};

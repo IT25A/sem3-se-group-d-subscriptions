@@ -16,22 +16,14 @@ async function createSubscription({ userId, subscription, price, category }) {
 }
 
 async function getSubscription({ userId }) {
-    try {
-        return await all("SELECT id, subscription, price, category FROM SubscriptionModel WHERE userid = ?",
-            [userId]);
-    } catch (err) {
-        throw new Error("Get Subscription failed");
-    }
+    return await all("SELECT id, subscription, price, category FROM SubscriptionModel WHERE userid = ?",
+        [userId])
 }
 
 async function deleteSubscription({ userId, id }) {
-    try {
-        const {changes} = await run("DELETE FROM SubscriptionModel WHERE userid = ? AND id = ?",
-            [userId, id]);
+    const {changes} = await run("DELETE FROM SubscriptionModel WHERE userid = ? AND id = ?",
+        [userId, id]);
         return {id, changes};
-    } catch (err) {
-        throw new Error("Delete Subscription failed");
-    }
 }
 
 async function updateSubscription({ userId, id, subscription, price, category }) {
@@ -43,7 +35,7 @@ async function updateSubscription({ userId, id, subscription, price, category })
         if (err.message.includes("UNIQUE constraint failed")) {
             throw new ConflictError("Subscription already exists");
         }
-        throw new Error("Update Subscription failed");
+        throw err;
     }
 }
 

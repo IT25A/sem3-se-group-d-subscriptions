@@ -44,9 +44,6 @@ router.get("/", async (req, res) => {
         res.status(200).json(subscriptionItem);
     }
     catch (err) {
-        if (err instanceof service.ConflictError) {
-            return res.status(409).json({ error: err.message });
-        }
         console.error("get subscription error:", err);
         res.status(500).json({ error: "Failed to get subscription" });
     }

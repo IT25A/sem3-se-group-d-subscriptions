@@ -6,23 +6,17 @@ const router = Router();
 router.post("/", async (req, res) => {
   const { username, email, password } = req.body ?? {};
 
-  if (!username || !email || !password) {
+  const name = typeof username === "string" ? username.trim() : "";
+  const mail = typeof email === "string" ? email.trim().toLowerCase() : "";
+
+  if (!name || !mail || typeof password !== "string" || !password) {
     return res.status(400).json({ error: "Username, email and password are required" });
   }
 
-  const name = typeof username === "string" ? username.trim() : "";
-  const mail = typeof email === "string" ? email.trim() : "";
-  const pass = typeof password === "string" ? password.trim() : "";
-
-  if (!name || !mail || !pass) {
-    return res.status(400).json({ error: "Illegal username, email or password" });
-  }
-
   try {
-    const user = await service.createUser({name, mail, pass});
+    const user = await service.createUser({ username: name, email: mail, password });
     res.status(201).json(user);
-  }
-  catch (err) {
+  } catch (err) {
     if (err instanceof service.ConflictError) {
       return res.status(409).json({ error: err.message });
     }

@@ -16,11 +16,14 @@ function SubscriptionList({ refresh, onDeleted, onAdded }) {
   const [activeFilter, setActiveFilter] = useState("All");
   const [sortOrder, setSortOrder] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [confirmDeleteSub, setConfirmDeleteSub] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingSub, setEditingSub] = useState(null);
 
-  const handleDelete = async (id) => {
+  const handleDelete = async () => {
+    const id = confirmDeleteSub.id;
+    setConfirmDeleteSub(null);
     setDeletingId(id);
     try {
       const res = await fetch(`/api/subscriptions/${id}`, {
@@ -141,7 +144,7 @@ function SubscriptionList({ refresh, onDeleted, onAdded }) {
                       <img src={editIcon} alt="Edit" className="icon icon-edit" />
                     </button>
                     <button
-                        onClick={() => handleDelete(sub.id)}
+                        onClick={() => setConfirmDeleteSub(sub)}
                         disabled={deletingId === sub.id}
                         className="transition-opacity disabled:opacity-40"
                         title="Löschen"
@@ -185,6 +188,27 @@ function SubscriptionList({ refresh, onDeleted, onAdded }) {
                 initialValues={editingSub}
                 onUpdated={handleUpdated}
             />
+          )}
+        </Modal>
+        <Modal
+            isOpen={!!confirmDeleteSub}
+            onClose={() => setConfirmDeleteSub(null)}
+            title="Delete subscription"
+        >
+          {confirmDeleteSub && (
+            <div className="flex flex-col gap-4">
+              <p className="t-secondary text-sm">
+                Are you sure you want to delete <span className="font-semibold t-primary">{confirmDeleteSub.subscription}</span>?
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button onClick={() => setConfirmDeleteSub(null)} className="btn-secondary">
+                  Cancel
+                </button>
+                <button onClick={handleDelete} className="btn-primary">
+                  Delete
+                </button>
+              </div>
+            </div>
           )}
         </Modal>
       </div>

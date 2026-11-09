@@ -2,7 +2,6 @@
   "name": "subscription-manager-backend",
   "version": "0.0.1",
   "private": true,
-  "type": "module",
   "scripts": {
     "start": "node ./src/server.js",
     "dev": "nodemon ./src/server.js",

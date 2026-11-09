@@ -4,10 +4,9 @@ import editIcon from "../../assets/edit.svg";
 import monthIcon from "../../assets/calendar-1.svg";
 import yearIcon from "../../assets/calendar-2.svg";
 
-function Dashboard({ budget, onBudgetChange, refresh }) {
+function Dashboard({ budget, onBudgetChange, refresh, notify }) {
     const [subscriptions, setSubscriptions] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [editingBudget, setEditingBudget] = useState(false);
     const [budgetInput, setBudgetInput] = useState("");
     const [budgetLoading, setBudgetLoading] = useState(false);
@@ -15,14 +14,13 @@ function Dashboard({ budget, onBudgetChange, refresh }) {
     useEffect(() => {
         fetch("/api/subscriptions", { credentials: "include" })
             .then((res) => {
-                if (!res.ok) throw new Error("Fehler beim Laden");
+                if (!res.ok) throw new Error("Error loading subscriptions.");
                 return res.json();
             })
             .then((data) => {
                 setSubscriptions(data);
-                setError(null);
             })
-            .catch((err) => setError(err.message))
+            .catch((err) => notify?.(err.message))
             .finally(() => setLoading(false));
     }, [refresh]);
 
@@ -45,8 +43,9 @@ function Dashboard({ budget, onBudgetChange, refresh }) {
             onBudgetChange(data.budget);
             setBudgetInput("");
             setEditingBudget(false);
+            notify?.("Budget updated successfully");
         } catch (err) {
-            alert(err.message);
+            notify?.(err.message);
         } finally {
             setBudgetLoading(false);
         }
@@ -66,8 +65,6 @@ function Dashboard({ budget, onBudgetChange, refresh }) {
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold t-primary">Overview</h2>
             </div>
-
-            {error && <p className="t-error text-sm mb-4">{error}</p>}
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {/* Monthly widget */}

@@ -9,10 +9,9 @@ import AddSubscription from "./AddSubscription.jsx";
 
 const CATEGORIES = ["Video-Streaming", "Music-Streaming", "Software", "Gaming", "News", "Fitness", "Other"];
 
-function SubscriptionList({ refresh, onDeleted, onAdded }) {
+function SubscriptionList({ refresh, onDeleted, onAdded, notify }) {
   const [subscriptions, setSubscriptions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState("All");
   const [sortOrder, setSortOrder] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
@@ -22,7 +21,7 @@ function SubscriptionList({ refresh, onDeleted, onAdded }) {
   const [editingSub, setEditingSub] = useState(null);
 
   const handleDelete = async () => {
-    const id = confirmDeleteSub.id;
+    const { id, subscription: name } = confirmDeleteSub;
     setConfirmDeleteSub(null);
     setDeletingId(id);
     try {
@@ -33,8 +32,9 @@ function SubscriptionList({ refresh, onDeleted, onAdded }) {
       if (!res.ok) throw new Error("Error deleting subscription");
       setSubscriptions((prev) => prev.filter((s) => s.id !== id));
       onDeleted?.();
+      notify?.(`"${name}" deleted`);
     } catch (err) {
-      alert(err.message);
+      notify?.(err.message);
     } finally {
       setDeletingId(null);
     }
@@ -55,9 +55,8 @@ function SubscriptionList({ refresh, onDeleted, onAdded }) {
         })
         .then((data) => {
           setSubscriptions(data);
-          setError(null);
         })
-        .catch((err) => setError(err.message))
+        .catch((err) => notify?.(err.message))
         .finally(() => setLoading(false));
   }, [refresh]);
 
@@ -175,6 +174,7 @@ function SubscriptionList({ refresh, onDeleted, onAdded }) {
                 onAdded?.(_data);
                 setShowAddModal(false);
               }}
+              notify={notify}
           />
         </Modal>
 
@@ -187,6 +187,7 @@ function SubscriptionList({ refresh, onDeleted, onAdded }) {
             <AddSubscription
                 initialValues={editingSub}
                 onUpdated={handleUpdated}
+                notify={notify}
             />
           )}
         </Modal>

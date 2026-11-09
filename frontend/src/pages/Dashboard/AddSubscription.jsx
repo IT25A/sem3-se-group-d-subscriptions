@@ -2,14 +2,13 @@ import { useState } from "react";
 
 const CATEGORIES = ["Video-Streaming", "Music-Streaming", "Software", "Gaming", "News", "Fitness", "Other"];
 
-function AddSubscription({ onAdded, initialValues, onUpdated }) {
+function AddSubscription({ onAdded, initialValues, onUpdated, notify }) {
   const isEdit = !!initialValues;
   const [form, setForm] = useState(
     initialValues
       ? { subscription: initialValues.subscription, price: String(initialValues.price), category: initialValues.category }
       : { subscription: "", price: "", category: "" }
   );
-  const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -19,7 +18,6 @@ function AddSubscription({ onAdded, initialValues, onUpdated }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setStatus(null);
 
     try {
       if (isEdit) {
@@ -31,8 +29,9 @@ function AddSubscription({ onAdded, initialValues, onUpdated }) {
         });
         if (!res.ok) {
           const data = await res.json();
-          setStatus({ error: data.error || "Fehler beim Speichern" });
+          notify?.(data.error || "Error saving subscription");
         } else {
+          notify?.(`"${form.subscription}" updated`);
           onUpdated?.({ ...initialValues, ...form, price: parseFloat(form.price) });
         }
       } else {
@@ -46,15 +45,15 @@ function AddSubscription({ onAdded, initialValues, onUpdated }) {
         const data = await res.json();
 
         if (!res.ok) {
-          setStatus({ error: data.error || "Fehler beim Anlegen" });
+          notify?.(data.error || "Error adding subscription");
         } else {
-          setStatus({ success: `"${data.subscription}" wurde angelegt (ID: ${data.id})` });
+          notify?.(`"${data.subscription}" added`);
           setForm({ subscription: "", price: "", category: "" });
           onAdded?.(data);
         }
       }
     } catch {
-      setStatus({ error: "Netzwerkfehler" });
+      notify?.("Network error");
     } finally {
       setLoading(false);
     }
@@ -104,13 +103,6 @@ function AddSubscription({ onAdded, initialValues, onUpdated }) {
               ))}
             </select>
           </div>
-
-          {status?.error && (
-              <p className="text-sm t-error">{status.error}</p>
-          )}
-          {status?.success && (
-              <p className="text-sm t-success">{status.success}</p>
-          )}
 
           <button
               type="submit"

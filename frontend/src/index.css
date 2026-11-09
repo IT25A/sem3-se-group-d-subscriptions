@@ -13,6 +13,7 @@
     --gradient-emerald: linear-gradient(to top, #064e3b, #047857);
     --color-btn-gray: #374151;
     --color-btn-gray-hover: #4b5563;
+    --element-box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
 html {
@@ -60,7 +61,23 @@ body {
         transition: box-shadow 200ms ease-in-out;
     }
     .card:hover {
-        box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        box-shadow: var(--element-box-shadow);
+    }
+    .notification {
+        @apply flex items-center text-center gap-4 rounded-2xl text-white;
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        transform: translateX(150%);
+        transition: transform 0.4s ease;
+        padding: 0.75rem 1.25rem;
+        z-index: 9999;
+        max-width: 320px;
+        background: #1f2937;
+        box-shadow: var(--element-box-shadow);
+    }
+    .notification--visible {
+        transform: translateX(0);
     }
 
     /* ── Typography ──────────────────────────────────────────── */

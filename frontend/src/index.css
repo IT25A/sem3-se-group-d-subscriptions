@@ -79,6 +79,11 @@ body {
     .notification--visible {
         transform: translateX(0);
     }
+    .comparison-card {
+        @apply flex gap-4;
+        height: calc(100vh - 10rem);
+        width: 100%;
+    }
 
     /* ── Typography ──────────────────────────────────────────── */
     .t-primary   { @apply text-gray-900 dark:text-white; }
@@ -212,5 +217,8 @@ body {
     }
     .main-header {
         @apply flex items-center justify-between mb-6;
+    }
+    .footer-note{
+        @apply mt-8 text-sm text-white;
     }
 }

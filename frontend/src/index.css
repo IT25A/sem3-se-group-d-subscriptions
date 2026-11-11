@@ -13,11 +13,13 @@
     --gradient-emerald: linear-gradient(to top, #064e3b, #047857);
     --color-btn-gray: #374151;
     --color-btn-gray-hover: #4b5563;
+    --element-box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
 html {
     box-sizing: border-box;
     position: relative;
+    overflow-y: scroll;
 
     &::after {
         content: "";
@@ -59,7 +61,28 @@ body {
         transition: box-shadow 200ms ease-in-out;
     }
     .card:hover {
-        box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        box-shadow: var(--element-box-shadow);
+    }
+    .notification {
+        @apply flex items-center text-center gap-4 rounded-2xl text-white;
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        transform: translateX(150%);
+        transition: transform 0.4s ease;
+        padding: 0.75rem 1.25rem;
+        z-index: 9999;
+        max-width: 320px;
+        background: #1f2937;
+        box-shadow: var(--element-box-shadow);
+    }
+    .notification--visible {
+        transform: translateX(0);
+    }
+    .comparison-card {
+        @apply flex gap-4;
+        height: calc(100vh - 10rem);
+        width: 100%;
     }
 
     /* ── Typography ──────────────────────────────────────────── */
@@ -85,23 +108,32 @@ body {
         transition: 0.25s;
     }
     .btn-secondary:hover { background: var(--color-btn-gray-hover); }
+    .btn-close {
+        @apply transform hover:scale-90 text-gray-500 hover:text-gray-300 text-xl leading-none cursor-pointer;
+        transition: 0.25s;
+    }
 
     /* ── Form controls ───────────────────────────────────────── */
     .input-field {
         @apply border border-gray-300 dark:border-gray-600
         rounded-xl px-3 py-2
         bg-white dark:bg-gray-700 dark:text-white
-        text-sm focus:outline-none focus:ring-2 focus:ring-blue-500;
+        text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700;
     }
 
     /* ── Icon filters ────────────────────────────────────────── */
     .icon {
-        @apply w-5 h-5 cursor-pointer;
+        @apply w-5 h-5;
     }
     .icon-white,
     .icon-delete,
     .icon-edit {
         filter: brightness(0) invert(1);
+    }
+    .icon-delete,
+    .icon-edit {
+        @apply transform hover:scale-95 cursor-pointer;
+        transition: 0.25s;
     }
     .icon-delete:hover {
         /* red-500 (#ef4444) */
@@ -119,7 +151,7 @@ body {
     }
     .chip:hover { background: var(--color-btn-gray-hover); }
     .chip-active {
-        @apply px-3 py-1 rounded-full text-xs font-medium transition-colors text-white;
+        @apply px-3 py-1 rounded-full text-xs font-medium transition-colors text-white cursor-pointer;
         background: var(--gradient-emerald);
     }
 
@@ -145,7 +177,7 @@ body {
         @apply flex items-center gap-3;
     }
     .sidebar-logo-img {
-        @apply w-16 h-16 p-1.5 object-contain;
+        @apply w-14 h-14 object-contain;
     }
     .sidebar-logo-text {
         @apply text-2xl font-bold tracking-wide text-white;
@@ -185,5 +217,8 @@ body {
     }
     .main-header {
         @apply flex items-center justify-between mb-6;
+    }
+    .footer-note{
+        @apply mt-8 text-sm text-white;
     }
 }

@@ -4,10 +4,9 @@ import editIcon from "../../assets/edit.svg";
 import monthIcon from "../../assets/calendar-1.svg";
 import yearIcon from "../../assets/calendar-2.svg";
 
-function Dashboard({ budget, onBudgetChange, refresh }) {
+function Dashboard({ budget, onBudgetChange, refresh, notify }) {
     const [subscriptions, setSubscriptions] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [editingBudget, setEditingBudget] = useState(false);
     const [budgetInput, setBudgetInput] = useState("");
     const [budgetLoading, setBudgetLoading] = useState(false);
@@ -15,14 +14,13 @@ function Dashboard({ budget, onBudgetChange, refresh }) {
     useEffect(() => {
         fetch("/api/subscriptions", { credentials: "include" })
             .then((res) => {
-                if (!res.ok) throw new Error("Fehler beim Laden");
+                if (!res.ok) throw new Error("Error loading subscriptions.");
                 return res.json();
             })
             .then((data) => {
                 setSubscriptions(data);
-                setError(null);
             })
-            .catch((err) => setError(err.message))
+            .catch((err) => notify?.(err.message))
             .finally(() => setLoading(false));
     }, [refresh]);
 
@@ -45,8 +43,9 @@ function Dashboard({ budget, onBudgetChange, refresh }) {
             onBudgetChange(data.budget);
             setBudgetInput("");
             setEditingBudget(false);
+            notify?.("Budget updated successfully");
         } catch (err) {
-            alert(err.message);
+            notify?.(err.message);
         } finally {
             setBudgetLoading(false);
         }
@@ -56,16 +55,16 @@ function Dashboard({ budget, onBudgetChange, refresh }) {
         const [euros, cents] = value.toFixed(2).split(".");
         return (
             <>
-                {euros}.<span className="text-base font-bold">{cents}</span>
+                {euros}<span className="text-base font-bold">.{cents}</span>
             </>
         );
     };
 
     return (
         <div className="container-md mt-6">
-            <h2 className="text-xl font-semibold t-primary mb-4">Übersicht</h2>
-
-            {error && <p className="t-error text-sm mb-4">{error}</p>}
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold t-primary">Overview</h2>
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {/* Monthly widget */}
@@ -77,7 +76,7 @@ function Dashboard({ budget, onBudgetChange, refresh }) {
                         <img src={monthIcon} alt="Monthly" className="icon icon-white" />
                     </div>
                     <div>
-                        <p className="text-xs t-muted mb-1">Monatliche Kosten</p>
+                        <p className="text-xs t-muted mb-1">Monthly costs</p>
                         {loading ? (
                             <p className="text-2xl font-bold t-primary">…</p>
                         ) : (
@@ -98,7 +97,7 @@ function Dashboard({ budget, onBudgetChange, refresh }) {
                         <img src={yearIcon} alt="Yearly" className="icon icon-white" />
                     </div>
                     <div>
-                        <p className="text-xs t-muted mb-1">Jährliche Kosten</p>
+                        <p className="text-xs t-muted mb-1">Yearly costs</p>
                         {loading ? (
                             <p className="text-2xl font-bold t-primary">…</p>
                         ) : (
@@ -119,7 +118,7 @@ function Dashboard({ budget, onBudgetChange, refresh }) {
                         <img src={walletIcon} alt="budget" className="icon icon-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-xs t-muted mb-1">Monatliches Budget</p>
+                        <p className="text-xs t-muted mb-1">Monthly budget</p>
                         {editingBudget ? (
                             <form onSubmit={handleBudgetSubmit} className="flex items-center gap-2 mt-1">
                                 <input
@@ -139,7 +138,7 @@ function Dashboard({ budget, onBudgetChange, refresh }) {
                                 <button
                                     type="button"
                                     onClick={() => setEditingBudget(false)}
-                                    className="text-sm t-muted hover:underline"
+                                    className="btn-close"
                                 >
                                     ✕
                                 </button>

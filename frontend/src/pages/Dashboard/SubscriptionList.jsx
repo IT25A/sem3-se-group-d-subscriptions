@@ -4,89 +4,65 @@ import filterPriceDescendingIcon from "../../assets/filter-price-desc.svg";
 import deleteIcon from "../../assets/trash.svg";
 import editIcon from "../../assets/edit.svg";
 import filterIcon from "../../assets/filter.svg";
+import Modal from "../../components/ui/Modal.jsx";
+import AddSubscription from "./AddSubscription.jsx";
 
-const CATEGORIES = ["Video-Streaming", "Music-Streaming", "Software", "Gaming", "News", "Fitness", "Sonstiges"];
+const CATEGORIES = ["Video-Streaming", "Music-Streaming", "Software", "Gaming", "News", "Fitness", "Other"];
 
-function SubscriptionList({ refresh, onDeleted }) {
+function SubscriptionList({ refresh, onDeleted, onAdded, notify }) {
   const [subscriptions, setSubscriptions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [activeFilter, setActiveFilter] = useState("Alle");
+  const [activeFilter, setActiveFilter] = useState("All");
   const [sortOrder, setSortOrder] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
-  const [editingId, setEditingId] = useState(null);
-  const [editValue, setEditValue] = useState("");
+  const [confirmDeleteSub, setConfirmDeleteSub] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [newPrice, setNewPrice] = useState("");
-  const [newCategory, setNewCategory] = useState("");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingSub, setEditingSub] = useState(null);
 
-  const handleDelete = async (id) => {
+  const handleDelete = async () => {
+    const { id, subscription: name } = confirmDeleteSub;
+    setConfirmDeleteSub(null);
     setDeletingId(id);
     try {
       const res = await fetch(`/api/subscriptions/${id}`, {
         method: "DELETE",
         credentials: "include",
       });
-      if (!res.ok) throw new Error("Fehler beim Löschen");
+      if (!res.ok) throw new Error("Error deleting subscription");
       setSubscriptions((prev) => prev.filter((s) => s.id !== id));
       onDeleted?.();
+      notify?.(`"${name}" deleted`);
     } catch (err) {
-      alert(err.message);
+      notify?.(err.message);
     } finally {
       setDeletingId(null);
     }
   };
 
-  const startEdit = (sub) => {
-    setEditingId(sub.id);
-    setEditValue(sub.subscription);
-    setNewPrice(String(sub.price));
-    setNewCategory(sub.category);
-  };
-
-  const handleUpdate = async (id) => {
-    if (!editValue.trim()) {
-      setEditingId(null);
-      setEditValue("");
-      return;
-    }
-    setEditingId(null);
-    const newName = editValue.trim();
-    setEditValue("");
-    try {
-      const res = await fetch(`/api/subscriptions/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ subscription: newName, price: newPrice, category: newCategory }),
-      });
-      if (!res.ok) throw new Error("Fehler beim Speichern");
-      setSubscriptions((prev) =>
-          prev.map((s) => (s.id === id ? { ...s, subscription: newName } : s))
-      );
-    } catch (err) {
-      alert(err.message);
-    }
+  const handleUpdated = (updated) => {
+    setSubscriptions((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
+    setEditingSub(null);
+    onAdded?.();
   };
 
   useEffect(() => {
     setLoading(true);
     fetch("/api/subscriptions", { credentials: "include" })
         .then((res) => {
-          if (!res.ok) throw new Error("Fehler beim Laden");
+          if (!res.ok) throw new Error("Error loading subscriptions");
           return res.json();
         })
         .then((data) => {
           setSubscriptions(data);
-          setError(null);
         })
-        .catch((err) => setError(err.message))
+        .catch((err) => notify?.(err.message))
         .finally(() => setLoading(false));
   }, [refresh]);
 
-  const usedCategories = ["Alle", ...CATEGORIES.filter((c) => subscriptions.some((s) => s.category === c))];
+  const usedCategories = ["All", ...CATEGORIES.filter((c) => subscriptions.some((s) => s.category === c))];
   const filtered = subscriptions
-      .filter((s) => activeFilter === "Alle" || s.category === activeFilter)
+      .filter((s) => activeFilter === "All" || s.category === activeFilter)
       .sort((a, b) => {
         if (sortOrder === "asc") return Number(a.price) - Number(b.price);
         if (sortOrder === "desc") return Number(b.price) - Number(a.price);
@@ -97,14 +73,19 @@ function SubscriptionList({ refresh, onDeleted }) {
       <div className="container-md mt-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold t-primary">
-            Meine Abos
+            My Subscriptions
           </h2>
-          <button
-              onClick={() => setShowFilters(v => !v)}
-              className={showFilters ? "btn-primary" : "btn-secondary"}
-          >
-            <img src={filterIcon} alt="Logout" className="icon icon-white" />
-          </button>
+          <div className="flex gap-2">
+            <button
+                onClick={() => setShowFilters(v => !v)}
+                className={showFilters ? "btn-primary" : "btn-secondary"}
+            >
+              <img src={filterIcon} alt="Logout" className="icon icon-white" />
+            </button>
+            <button className="btn-primary" onClick={() => setShowAddModal(true)}>
+              + Add
+            </button>
+          </div>
         </div>
 
         {showFilters && (
@@ -122,18 +103,18 @@ function SubscriptionList({ refresh, onDeleted }) {
               </div>
 
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-xs t-muted">Preis:</span>
+                <span className="text-xs t-muted">Price:</span>
                 <button
                     onClick={() => setSortOrder(sortOrder === "desc" ? null : "desc")}
                     className={sortOrder === "desc" ? "chip-active" : "chip"}
                 >
-                  <img src={filterPriceAscendingIcon} alt="Teuerste zuerst" className="icon icon-white" />
+                  <img src={filterPriceAscendingIcon} alt="Most to least" className="icon icon-white" />
                 </button>
                 <button
                     onClick={() => setSortOrder(sortOrder === "asc" ? null : "asc")}
                     className={sortOrder === "asc" ? "chip-active" : "chip"}
                 >
-                  <img src={filterPriceDescendingIcon} alt="Günstigste zuerst" className="icon icon-white" />
+                  <img src={filterPriceDescendingIcon} alt="Least to most" className="icon icon-white" />
                 </button>
               </div>
             </>
@@ -147,23 +128,7 @@ function SubscriptionList({ refresh, onDeleted }) {
               >
                 <div className="flex flex-row">
                   <div className="flex-1 min-w-0">
-                    {editingId === sub.id ? (
-                        <input
-                            autoFocus
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") { e.preventDefault(); handleUpdate(sub.id); }
-                              if (e.key === "Escape") { setEditingId(null); setEditValue(""); }
-                            }}
-                            onBlur={() => {
-                              if (editingId === sub.id) handleUpdate(sub.id);
-                            }}
-                            className="border border-blue-400 rounded px-2 py-0.5 text-sm bg-white dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    ) : (
-                        <span className="font-medium t-primary">{sub.subscription}</span>
-                    )}
+                    <span className="font-medium t-primary">{sub.subscription}</span>
                     <span className="ml-2 text-xs t-faint">{sub.category}</span>
                   </div>
                   <div className="flex items-center gap-3">
@@ -171,14 +136,14 @@ function SubscriptionList({ refresh, onDeleted }) {
                   {Number(sub.price).toFixed(2)} €
                 </span>
                     <button
-                        onClick={() => startEdit(sub)}
+                        onClick={() => setEditingSub(sub)}
                         className="transition-opacity disabled:opacity-40"
-                        title="Bearbeiten"
+                        title="Edit"
                     >
                       <img src={editIcon} alt="Edit" className="icon icon-edit" />
                     </button>
                     <button
-                        onClick={() => handleDelete(sub.id)}
+                        onClick={() => setConfirmDeleteSub(sub)}
                         disabled={deletingId === sub.id}
                         className="transition-opacity disabled:opacity-40"
                         title="Löschen"
@@ -194,10 +159,59 @@ function SubscriptionList({ refresh, onDeleted }) {
         {filtered.length === 0 && (
           <p className="t-faint mt-2 text-sm">
             {subscriptions.length === 0
-              ? "Noch keine Abos vorhanden."
-              : "Keine Abos für diesen Filter."}
+              ? "No subscriptions yet."
+              : "No subscriptions for this filter."}
           </p>
         )}
+
+        <Modal
+            isOpen={showAddModal}
+            onClose={() => setShowAddModal(false)}
+            title="Add subscription"
+        >
+          <AddSubscription
+              onAdded={(_data) => {
+                onAdded?.(_data);
+                setShowAddModal(false);
+              }}
+              notify={notify}
+          />
+        </Modal>
+
+        <Modal
+            isOpen={!!editingSub}
+            onClose={() => setEditingSub(null)}
+            title="Edit subscription"
+        >
+          {editingSub && (
+            <AddSubscription
+                initialValues={editingSub}
+                onUpdated={handleUpdated}
+                notify={notify}
+            />
+          )}
+        </Modal>
+        <Modal
+            isOpen={!!confirmDeleteSub}
+            onClose={() => setConfirmDeleteSub(null)}
+            title="Delete subscription"
+        >
+          {confirmDeleteSub && (
+            <div className="flex flex-col gap-4">
+              <p className="t-secondary text-sm">
+                Are you sure you want to delete <span className="font-semibold t-primary">{confirmDeleteSub.subscription}</span>?
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button onClick={() => setConfirmDeleteSub(null)} className="btn-secondary">
+                  Cancel
+                </button>
+                <button onClick={handleDelete} className="btn-primary">
+                  Delete
+                </button>
+              </div>
+            </div>
+          )}
+        </Modal>
       </div>
   );
 }

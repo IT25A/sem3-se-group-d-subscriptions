@@ -1,10 +1,14 @@
 import { useState } from "react";
 
-const CATEGORIES = ["Video-Streaming", "Music-Streaming", "Software", "Gaming", "News", "Fitness", "Sonstiges"];
+const CATEGORIES = ["Video-Streaming", "Music-Streaming", "Software", "Gaming", "News", "Fitness", "Other"];
 
-function AddSubscription({ onAdded }) {
-  const [form, setForm] = useState({ subscription: "", price: "", category: "" });
-  const [status, setStatus] = useState(null);
+function AddSubscription({ onAdded, initialValues, onUpdated, notify }) {
+  const isEdit = !!initialValues;
+  const [form, setForm] = useState(
+    initialValues
+      ? { subscription: initialValues.subscription, price: String(initialValues.price), category: initialValues.category }
+      : { subscription: "", price: "", category: "" }
+  );
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -14,39 +18,49 @@ function AddSubscription({ onAdded }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setStatus(null);
 
     try {
-      const res = await fetch("/api/subscriptions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ ...form, price: parseFloat(form.price) }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setStatus({ error: data.error || "Fehler beim Anlegen" });
+      if (isEdit) {
+        const res = await fetch(`/api/subscriptions/${initialValues.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ ...form, price: parseFloat(form.price) }),
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          notify?.(data.error || "Error saving subscription");
+        } else {
+          notify?.(`"${form.subscription}" updated`);
+          onUpdated?.({ ...initialValues, ...form, price: parseFloat(form.price) });
+        }
       } else {
-        setStatus({ success: `"${data.subscription}" wurde angelegt (ID: ${data.id})` });
-        setForm({ subscription: "", price: "", category: "" });
-        onAdded?.(data);
+        const res = await fetch("/api/subscriptions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ ...form, price: parseFloat(form.price) }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          notify?.(data.error || "Error adding subscription");
+        } else {
+          notify?.(`"${data.subscription}" added`);
+          setForm({ subscription: "", price: "", category: "" });
+          onAdded?.(data);
+        }
       }
     } catch {
-      setStatus({ error: "Netzwerkfehler" });
+      notify?.("Network error");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-      <div className="container-md mt-8 p-6 card">
-        <h2 className="text-xl font-semibold t-primary mb-4">
-          Subscription anlegen
-        </h2>
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
             <label className="block text-sm t-secondary mb-1">Name</label>
             <input
@@ -54,13 +68,13 @@ function AddSubscription({ onAdded }) {
                 value={form.subscription}
                 onChange={handleChange}
                 required
-                placeholder="z.B. Netflix"
+                placeholder="e.g. Netflix"
                 className="w-full input-field"
             />
           </div>
 
           <div>
-            <label className="block text-sm t-secondary mb-1">Preis (€)</label>
+            <label className="block text-sm t-secondary mb-1">Price (€)</label>
             <input
                 name="price"
                 type="number"
@@ -69,13 +83,13 @@ function AddSubscription({ onAdded }) {
                 value={form.price}
                 onChange={handleChange}
                 required
-                placeholder="z.B. 12.99"
+                placeholder="e.g. 12.99"
                 className="w-full input-field"
             />
           </div>
 
           <div>
-            <label className="block text-sm t-secondary mb-1">Kategorie</label>
+            <label className="block text-sm t-secondary mb-1">Category</label>
             <select
                 name="category"
                 value={form.category}
@@ -83,29 +97,21 @@ function AddSubscription({ onAdded }) {
                 required
                 className="w-full input-field"
             >
-              <option value="">Bitte wählen…</option>
+              <option value="">Please choose…</option>
               {CATEGORIES.map((c) => (
                   <option key={c} value={c}>{c}</option>
               ))}
             </select>
           </div>
 
-          {status?.error && (
-              <p className="text-sm t-error">{status.error}</p>
-          )}
-          {status?.success && (
-              <p className="text-sm t-success">{status.success}</p>
-          )}
-
           <button
               type="submit"
               disabled={loading}
               className="btn-primary"
           >
-            {loading ? "Wird angelegt…" : "Anlegen"}
+            {loading ? (isEdit ? "Saving…" : "Adding…") : (isEdit ? "Save" : "Add")}
           </button>
-        </form>
-      </div>
+      </form>
   );
 }
 

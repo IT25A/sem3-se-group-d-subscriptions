@@ -37,7 +37,7 @@ function AuthPage({ onLogin }) {
 							onClick={() => setTab("register")}
 							className={tabClass("register")}
 						>
-							Registrieren
+							Register
 						</button>
 					</div>
 

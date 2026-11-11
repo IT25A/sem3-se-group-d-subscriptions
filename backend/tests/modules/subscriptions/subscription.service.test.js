@@ -1,56 +1,65 @@
 process.env.DB_PATH = ":memory:";
 
-const db = require("../../../src/database");
+const { db, run } = require("../../../src/database");
 const service = require("../../../src/modules/subscribtion/subscription.service");
 const userService = require("../../../src/modules/users/users.service");
 const assert = require('node:assert/strict');
 const { describe,test, beforeEach, after } = require("node:test");
 
-const user = {username: "user1", email: "mail@test.de", password: "password" };
-const testUser = userService.createUser(user);
-const subscription = {userId: testUser.id, subscription: "Netflix", price: 12, category: "Video-Streaming"}
+let testUser;
+let subscription;
 
 describe("subscriptions", () => {
-	beforeEach(() => {
-		db.exec("DELETE FROM SubscriptionModel;");
+	beforeEach(async() => {
+		await run("DELETE FROM SubscriptionModel;");
+		await run("DELETE FROM Users");
+		testUser = await userService.createUser({username: "user1", email: "mail@test.de", password: "password" });
+		subscription = {userId: testUser.id, subscription: "Netflix", price: 12, category: "Video-Streaming"}
 	});
 
-	after(() => db.close());
+	after(() => new Promise((resolve) => db.close(resolve)));
 
-	test("create new subscription", () => {
-		const created = service.createSubscription(subscription);
+	test("create new subscription", async() => {
+		const created = await service.createSubscription(subscription);
 		assert.deepEqual(created, {id: created.id, subscription: "Netflix", price: 12, category: "Video-Streaming"});
 		assert.equal(typeof created.id, "number");
 	})
 
-	test("create subscription fails when it already exists", () => {
-		service.createSubscription(subscription);
-		assert.throws(() => service.createSubscription(subscription), service.ConflictError);
+	test("create subscription fails when it already exists", async() => {
+		await service.createSubscription(subscription);
+		await assert.rejects(() => service.createSubscription(subscription), service.ConflictError);
 	})
 
-	test("getSubscriptions", () => {
-		const created = service.createSubscription({userId: testUser.id, subscription: "Spotify", price: 12, category: "Musik-Streaming"});
-		const created2 = service.createSubscription(subscription);
-		const info = service.getSubscription({userId: testUser.id});
+	test("getSubscriptions", async() => {
+		const created = await service.createSubscription({userId: testUser.id, subscription: "Spotify", price: 12, category: "Musik-Streaming"});
+		const created2 = await service.createSubscription(subscription);
+		const info = await service.getSubscription({userId: testUser.id});
 		assert.deepEqual([created2, created], info);
 	})
 
-	test("delete Subscription", () => {
-		const video = service.createSubscription(subscription);
-		const music =	service.createSubscription({userId: testUser.id, subscription: "Spotify", price: 12, category: "Musik-Streaming"});
-		const twoSubs = service.getSubscription({userId: testUser.id});
-		const deleted = service.deleteSubscription({userId: testUser.id, id: video.id});
-		const oneSubs = service.getSubscription({userId: testUser.id});
+	test("delete Subscription", async() => {
+		const video = await service.createSubscription(subscription);
+		const music =	await service.createSubscription({userId: testUser.id, subscription: "Spotify", price: 12, category: "Musik-Streaming"});
+		const twoSubs = await service.getSubscription({userId: testUser.id});
+		const deleted = await service.deleteSubscription({userId: testUser.id, id: video.id});
+		const oneSubs = await service.getSubscription({userId: testUser.id});
 		assert.deepEqual(twoSubs, [video, music]);
 		assert.deepEqual(oneSubs, [music]);
 		assert.equal(deleted.changes, 1)
 	})
 
-	test("updateSubscription", () => {
-		const video = service.createSubscription(subscription);
-		const info = service.updateSubscription({userId: testUser.id, id: video.id, subscription: "Hulu", price: 15, category: "Video-Streaming"});
-		const list = service.getSubscription({userId: testUser.id});
+	test("updateSubscription", async() => {
+		const video = await service.createSubscription(subscription);
+		const info = await service.updateSubscription({userId: testUser.id, id: video.id, subscription: "Hulu", price: 15, category: "Video-Streaming"});
+		const list = await service.getSubscription({userId: testUser.id});
 		assert.deepEqual(list, [{id: video.id, subscription: "Hulu", price: 15, category: "Video-Streaming"}]);
 		assert.equal(info.changes, 1);
 	});
+
+	test("updateSubscription fails when name already exists", async() => {
+		await service.createSubscription(subscription);
+		const music =	await service.createSubscription({userId: testUser.id, subscription: "Spotify", price: 12, category: "Musik-Streaming"});
+		const update = {userId: testUser.id, id: music.id, subscription: "Netflix", price: 15, category: "Video-Streaming"};
+		await assert.rejects(() => service.updateSubscription(update), service.ConflictError);
+	})
 })

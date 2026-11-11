@@ -2,7 +2,7 @@ module.exports = (db) => {
     db.exec(`
         CREATE TABLE IF NOT EXISTS SubscriptionModel (
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
-            userid          INTEGER REFERENCES Users(id),
+            userid          INTEGER REFERENCES Users(id) ON DELETE CASCADE,
             price           Float   NOT NULL,
             
             subscription    TEXT    NOT NULL,

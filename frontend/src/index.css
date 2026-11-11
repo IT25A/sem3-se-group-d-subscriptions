@@ -11,6 +11,8 @@
     --width-content: 1140px;
     --gradient-bg: linear-gradient(to left, #0f0c29, #152331);
     --gradient-emerald: linear-gradient(to top, #064e3b, #047857);
+    --gradient-error: linear-gradient(to right,#b91c1c,#ef4444);
+    --gradient-alert: linear-gradient(to right,#b45309,#f59e0b);
     --color-btn-gray: #374151;
     --color-btn-gray-hover: #4b5563;
     --element-box-shadow: 0 2px 8px rgba(0,0,0,0.4);
@@ -92,6 +94,7 @@ body {
     .t-faint     { @apply text-gray-400; }
     .t-accent    { @apply text-emerald-800 dark:text-emerald-700; }
     .t-error     { @apply text-red-500; }
+    .t-alert     { @apply text-yellow-400; }
     .t-success   { @apply text-green-600 dark:text-green-400; }
 
     /* ── Buttons ─────────────────────────────────────────────── */
@@ -135,6 +138,7 @@ body {
         @apply transform hover:scale-95 cursor-pointer;
         transition: 0.25s;
     }
+    .icon-alert,
     .icon-delete:hover {
         /* red-500 (#ef4444) */
         filter: invert(37%) sepia(99%) saturate(749%) hue-rotate(323deg) brightness(104%) contrast(93%);

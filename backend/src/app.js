@@ -3,7 +3,7 @@ const session = require("express-session")
 const cors = require("cors");
 const usersRouter = require("./modules/users/users.router");
 const authRouter = require("./modules/auth/auth.router");
-const subscriptionRouter = require("./modules/subscribtion/subscription.router");
+const subscriptionRouter = require("./modules/subscription/subscription.router");
 const webscraperRouter = require("./modules/webscraper/webscraper.router");
 
 

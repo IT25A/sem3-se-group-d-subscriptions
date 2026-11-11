@@ -2,7 +2,7 @@ process.env.DB_PATH = ":memory:";
 
 const { db, run, get, all} = require("../../../src/database");
 const service = require("../../../src/modules/users/users.service");
-const subscriptions = require("../../../src/modules/subscribtion/subscription.service");
+const subscriptions = require("../../../src/modules/subscription/subscription.service");
 
 const assert = require('node:assert/strict');
 const { describe,test, beforeEach, after } = require("node:test");

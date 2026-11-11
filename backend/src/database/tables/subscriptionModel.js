@@ -4,6 +4,7 @@ module.exports = (db) => {
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
             userid          INTEGER REFERENCES Users(id) ON DELETE CASCADE,
             price           Float   NOT NULL,
+            date            DATE default current_date,
             
             subscription    TEXT    NOT NULL,
             category        TEXT    NOT NULL,

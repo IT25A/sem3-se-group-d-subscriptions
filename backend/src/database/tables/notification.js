@@ -4,7 +4,7 @@ module.exports = (db) => {
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
             userid          INTEGER REFERENCES Users(id) ON DELETE CASCADE,
             date            DATE NOT NULL,
-            message         TEXT NOT NULL,
+            message         TEXT NOT NULL
         )
     `);
 };

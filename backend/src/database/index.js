@@ -2,6 +2,7 @@ const sqlite3 = require("sqlite3")
 const { storage } = require("../configs/db");
 const createUsersTable = require("./tables/users");
 const createSubscriptionTable = require("./tables/subscriptionModel");
+const createNotificationsTable = require("./tables/notification");
 
 const db = new sqlite3.Database(storage, (err) => {
 	if (err) {
@@ -14,6 +15,7 @@ db.serialize();
 db.exec("PRAGMA foreign_keys = ON")
 createUsersTable(db)
 createSubscriptionTable(db)
+createNotificationsTable(db)
 console.log("Connected to database")
 
 const run = (sql, params = []) =>

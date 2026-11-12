@@ -53,7 +53,7 @@ function Login ({ onLogin }) {
 				/>
 				<button
 					type="submit"
-					className="btn-primary"
+					className="btn btn-primary"
 				>
 					Login
 				</button>

@@ -8,6 +8,7 @@ import analyticsIcon from "../../assets/chart.svg";
 import compareIcon from "../../assets/compare.svg";
 import notificationIcon from "../../assets/notification.svg";
 import Modal from "../ui/Modal.jsx";
+import Settings from "../../pages/Settings/Settings.jsx";
 
 function Sidebar({ user, onLogout, activePage, onNavigate }) {
     const [showSettings, setShowSettings] = useState(false);
@@ -48,17 +49,17 @@ function Sidebar({ user, onLogout, activePage, onNavigate }) {
                         <span className="sidebar-username">{user?.username}</span>
                     </div>
                     <div className="flex gap-2">
-                        <button className="btn-secondary" title="Settings" onClick={() => setShowSettings(true)}>
+                        <button className="btn btn-secondary" title="Settings" onClick={() => setShowSettings(true)}>
                             <img src={settingsIcon} alt="Settings" className="icon icon-white" />
                         </button>
-                        <button className="btn-secondary" onClick={onLogout} title="Logout">
+                        <button className="btn btn-secondary" onClick={onLogout} title="Logout">
                             <img src={logoutIcon} alt="Logout" className="icon icon-white" />
                         </button>
                     </div>
                 </div>
             </aside>
             <Modal isOpen={showSettings} onClose={() => setShowSettings(false)} title="Settings">
-                <p className="t-secondary text-sm">No settings available yet.</p>
+                <Settings onAccountDeleted={onLogout} />
             </Modal>
         </div>
     );

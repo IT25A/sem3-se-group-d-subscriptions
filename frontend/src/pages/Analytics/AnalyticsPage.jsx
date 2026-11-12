@@ -1,21 +1,33 @@
 import { useEffect, useState } from "react";
+import Modal from "../../components/ui/Modal";
 import monthIcon from "../../assets/calendar-1.svg";
 import yearIcon from "../../assets/calendar-2.svg";
 import walletIcon from "../../assets/wallet.svg";
 import subscriptionIcon from "../../assets/currency.svg";
 import alertIcon from "../../assets/alert.svg";
 
-const CATEGORIES = ["Video-Streaming", "Music-Streaming", "Software", "Gaming", "News", "Fitness", "Other"];
-
-const CATEGORY_COLORS = {
-    "Video-Streaming":  "#228B22",
-    "Music-Streaming":  "#6495ED",
-    "Software":         "#9F2B68",
-    "Gaming":           "#D70040",
-    "News":             "#CC7722",
-    "Fitness":          "#275BF5",
-    "Other":        "#757575",
+const PRESET_COLORS = {
+    "Video-Streaming": "#228B22",
+    "Music-Streaming": "#6495ED",
+    "Software":        "#9F2B68",
+    "Gaming":          "#D70040",
+    "News":            "#CC7722",
+    "Fitness":         "#275BF5",
+    "Other":           "#757575",
 };
+
+const PALETTE = [
+    "#E63946", "#F4A261", "#2A9D8F", "#E9C46A", "#457B9D",
+    "#A8DADC", "#F72585", "#7209B7", "#3A0CA3", "#4CC9F0",
+    "#06D6A0", "#FFD166", "#EF476F", "#118AB2", "#073B4C",
+];
+
+function getCategoryColor(cat, allCategories) {
+    if (PRESET_COLORS[cat]) return PRESET_COLORS[cat];
+    const customCats = allCategories.filter((c) => !PRESET_COLORS[c]);
+    const idx = customCats.indexOf(cat);
+    return PALETTE[idx % PALETTE.length];
+}
 
 function formatPrice(value, smallCents) {
     const [euros, cents] = value.toFixed(2).split(".");
@@ -67,10 +79,29 @@ function CategoryBar({ label, amount, pct, color }) {
     );
 }
 
+function CategoryChartModal({ byCategory, allCategories, monthly, onClose }) {
+    return (
+        <Modal isOpen onClose={onClose} title="All categories" size="max-w-2xl">
+            <div className="max-h-[60vh] overflow-y-auto pr-1">
+                {byCategory.map(({ label, amount }) => (
+                    <CategoryBar
+                        key={label}
+                        label={label}
+                        amount={amount}
+                        pct={monthly > 0 ? (amount / monthly) * 100 : 0}
+                        color={getCategoryColor(label, allCategories)}
+                    />
+                ))}
+            </div>
+        </Modal>
+    );
+}
+
 function Analytics({ budget, refresh }) {
     const [subscriptions, setSubscriptions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showAllCategories, setShowAllCategories] = useState(false);
 
     useEffect(() => {
         setLoading(true);
@@ -93,13 +124,17 @@ function Analytics({ budget, refresh }) {
         ? Math.round((monthly / Number(budget)) * 100)
         : null;
 
-    const byCategory = CATEGORIES.reduce((acc, cat) => {
-        const total = subscriptions
-            .filter((s) => s.category === cat)
-            .reduce((sum, s) => sum + Number(s.price), 0);
-        if (total > 0) acc.push({ label: cat, amount: total });
-        return acc;
-    }, []).sort((a, b) => b.amount - a.amount);
+    const byCategory = Object.entries(
+        subscriptions.reduce((acc, s) => {
+            const cat = s.category || "Other";
+            acc[cat] = (acc[cat] ?? 0) + Number(s.price);
+            return acc;
+        }, {})
+    )
+        .map(([label, amount]) => ({ label, amount }))
+        .sort((a, b) => b.amount - a.amount);
+
+    const allCategories = byCategory.map((c) => c.label);
 
     const mostExpensive = subscriptions.length
         ? [...subscriptions].sort((a, b) => Number(b.price) - Number(a.price))[0]
@@ -144,17 +179,35 @@ function Analytics({ budget, refresh }) {
                     ) : byCategory.length === 0 ? (
                         <p className="t-muted text-sm">No subscriptions yet.</p>
                     ) : (
-                        byCategory.map(({ label, amount }) => (
-                            <CategoryBar
-                                key={label}
-                                label={label}
-                                amount={amount}
-                                pct={monthly > 0 ? (amount / monthly) * 100 : 0}
-                                color={CATEGORY_COLORS[label] ?? "#047857"}
-                            />
-                        ))
+                        <>
+                            {byCategory.slice(0, 6).map(({ label, amount }) => (
+                                <CategoryBar
+                                    key={label}
+                                    label={label}
+                                    amount={amount}
+                                    pct={monthly > 0 ? (amount / monthly) * 100 : 0}
+                                    color={getCategoryColor(label, allCategories)}
+                                />
+                            ))}
+                            {byCategory.length > 6 && (
+                                <button
+                                    className="btn-sm btn-secondary"
+                                    onClick={() => setShowAllCategories(true)}
+                                >
+                                    + {byCategory.length - 6} more
+                                </button>
+                            )}
+                        </>
                     )}
                 </div>
+                {showAllCategories && (
+                    <CategoryChartModal
+                        byCategory={byCategory}
+                        allCategories={allCategories}
+                        monthly={monthly}
+                        onClose={() => setShowAllCategories(false)}
+                    />
+                )}
 
                 <div className="flex flex-col gap-4">
                     {/* Budget usage gauge */}
@@ -237,7 +290,7 @@ function Analytics({ budget, refresh }) {
                                             <td className="py-2.5">
                                         <span
                                             className="inline-block w-2.5 h-2.5 rounded-full mr-2 align-middle"
-                                            style={{ background: CATEGORY_COLORS[label] ?? "#047857" }}
+                                            style={{ background: getCategoryColor(label, allCategories) }}
                                         />
                                                 <span className="t-primary">{label}</span>
                                             </td>

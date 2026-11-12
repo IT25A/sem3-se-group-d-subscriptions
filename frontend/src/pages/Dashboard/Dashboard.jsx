@@ -132,7 +132,7 @@ function Dashboard({ budget, onBudgetChange, refresh, notify }) {
                                     required
                                     className="w-24 input-field"
                                 />
-                                <button type="submit" disabled={budgetLoading} className="btn-primary">
+                                <button type="submit" disabled={budgetLoading} className="btn btn-primary">
                                     {budgetLoading ? "…" : "OK"}
                                 </button>
                                 <button
@@ -159,7 +159,7 @@ function Dashboard({ budget, onBudgetChange, refresh, notify }) {
                         ) : (
                             <button
                                 onClick={() => { setBudgetInput(""); setEditingBudget(true); }}
-                                className="btn-primary mt-1"
+                                className="btn btn-primary mt-1"
                             >
                                 Setzen
                             </button>

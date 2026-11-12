@@ -5,9 +5,8 @@ import deleteIcon from "../../assets/trash.svg";
 import editIcon from "../../assets/edit.svg";
 import filterIcon from "../../assets/filter.svg";
 import Modal from "../../components/ui/Modal.jsx";
+import ConfirmationModal from "../../components/ui/ConfirmationModal.jsx";
 import AddSubscription from "./AddSubscription.jsx";
-
-const CATEGORIES = ["Video-Streaming", "Music-Streaming", "Software", "Gaming", "News", "Fitness", "Other"];
 
 function SubscriptionList({ refresh, onDeleted, onAdded, notify }) {
   const [subscriptions, setSubscriptions] = useState([]);
@@ -60,7 +59,7 @@ function SubscriptionList({ refresh, onDeleted, onAdded, notify }) {
         .finally(() => setLoading(false));
   }, [refresh]);
 
-  const usedCategories = ["All", ...CATEGORIES.filter((c) => subscriptions.some((s) => s.category === c))];
+  const usedCategories = ["All", ...Array.from(new Set(subscriptions.map((s) => s.category).filter(Boolean)))];
   const filtered = subscriptions
       .filter((s) => activeFilter === "All" || s.category === activeFilter)
       .sort((a, b) => {
@@ -78,11 +77,11 @@ function SubscriptionList({ refresh, onDeleted, onAdded, notify }) {
           <div className="flex gap-2">
             <button
                 onClick={() => setShowFilters(v => !v)}
-                className={showFilters ? "btn-primary" : "btn-secondary"}
+                className={showFilters ? "btn btn-primary" : "btn btn-secondary"}
             >
               <img src={filterIcon} alt="Logout" className="icon icon-white" />
             </button>
-            <button className="btn-primary" onClick={() => setShowAddModal(true)}>
+            <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
               + Add
             </button>
           </div>
@@ -191,27 +190,13 @@ function SubscriptionList({ refresh, onDeleted, onAdded, notify }) {
             />
           )}
         </Modal>
-        <Modal
+        <ConfirmationModal
             isOpen={!!confirmDeleteSub}
             onClose={() => setConfirmDeleteSub(null)}
+            onConfirm={handleDelete}
             title="Delete subscription"
-        >
-          {confirmDeleteSub && (
-            <div className="flex flex-col gap-4">
-              <p className="t-secondary text-sm">
-                Are you sure you want to delete <span className="font-semibold t-primary">{confirmDeleteSub.subscription}</span>?
-              </p>
-              <div className="flex gap-3 justify-end">
-                <button onClick={() => setConfirmDeleteSub(null)} className="btn-secondary">
-                  Cancel
-                </button>
-                <button onClick={handleDelete} className="btn-primary">
-                  Delete
-                </button>
-              </div>
-            </div>
-          )}
-        </Modal>
+            message={confirmDeleteSub ? <>Are you sure you want to delete <span className="font-semibold t-primary">{confirmDeleteSub.subscription}</span>?</> : ""}
+        />
       </div>
   );
 }

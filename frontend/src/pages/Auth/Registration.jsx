@@ -63,7 +63,7 @@ function Registration ({ onSuccess }) {
 				/>
 				<button
 					type="submit"
-					className="btn-primary"
+					className="btn btn-primary"
 				>
 					Create user
 				</button>

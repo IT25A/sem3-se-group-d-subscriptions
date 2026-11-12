@@ -41,7 +41,7 @@ describe("subscriptionRouter", () => {
 	test("POST /api/subscriptions gets default date when input empty", async () => {
 		const agent = await loggedInAgent("user");
 		const sub = await agent.post("/api/subscriptions").send({subscription: "Netflix", price: 12, category: "Video-Streaming", date: ""});
-		assert.deepEqual(sub.body, {id: sub.body.id, subscription: "Netflix", price: 12, category: "Video-Streaming", date: "2026-11-12"});
+		assert.deepEqual(sub.body, {id: sub.body.id, subscription: "Netflix", price: 12, category: "Video-Streaming", date: new Date().toISOString().split('T')[0]});
 	})
 
 	test("POST /api/subscriptions returns 400 when date not valid", async () => {
@@ -88,7 +88,7 @@ describe("subscriptionRouter", () => {
 		assert.deepEqual((await agentB.get("/api/subscriptions")).body, []);
 	})
 
-	test("delete /api/subscriptions returns 200 when successful", async () => {
+	test("DELETE /api/subscriptions returns 200 when successful", async () => {
 		const agent = await loggedInAgent("user");
 		const created = await agent.post("/api/subscriptions").send(subscription);
 		assert.deepEqual((await agent.get("/api/subscriptions")).body, [{id: created.body.id, subscription: "Netflix", price: 12, category: "Video-Streaming", date: "2026-12-11"}]);
@@ -98,7 +98,7 @@ describe("subscriptionRouter", () => {
 		assert.deepEqual((await agent.get("/api/subscriptions")).body, []);
 	})
 
-	test("delete /api/subscriptions returns 401 when no user logged in", async () => {
+	test("DELETE /api/subscriptions returns 401 when no user logged in", async () => {
 		const agent = await loggedInAgent("user");
 		const created = await agent.post("/api/subscriptions").send(subscription);
 		assert.deepEqual((await agent.get("/api/subscriptions")).body, [{id: created.body.id, subscription: "Netflix", price: 12, category: "Video-Streaming", date: "2026-12-11"}]);
@@ -108,13 +108,13 @@ describe("subscriptionRouter", () => {
 		assert.equal(deleted.status, 401);
 	})
 
-	test("delete /api/subscriptions returns 404 when subscription not found", async () => {
+	test("DELETE /api/subscriptions returns 404 when subscription not found", async () => {
 		const agent = await loggedInAgent("user");
 		const deleted = await agent.delete(`/api/subscriptions/1`);
 		assert.equal(deleted.status, 404);
 	})
 
-	test("delete /api/subscriptions can't delete twice", async () => {
+	test("DELETE /api/subscriptions can't delete twice", async () => {
 		const agent = await loggedInAgent("user");
 		const created = await agent.post("/api/subscriptions").send(subscription)
 		await agent.delete(`/api/subscriptions/${created.body.id}`);
@@ -122,7 +122,7 @@ describe("subscriptionRouter", () => {
 		assert.equal(deleted.status, 404);
 	})
 
-	test("delete /api/subscriptions can't delete other users subscription", async () => {
+	test("DELETE /api/subscriptions can't delete other users subscription", async () => {
 		const agentA = await loggedInAgent("user");
 		const agentB = await loggedInAgent("user2");
 		const created = await agentB.post("/api/subscriptions").send(subscription);

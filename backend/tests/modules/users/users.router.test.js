@@ -21,19 +21,19 @@ describe("usersRouter", () => {
 		assert.equal(res.body.password, undefined);
 	});
 
-	test("post /api/users throws 409 when user exists", async () => {
+	test("POST /api/users throws 409 when user exists", async () => {
 		await request(app).post("/api/users").send(user);
 		const res = await request(app).post("/api/users").send(user);
 		assert.equal(res.status, 409);
 	})
 
-	test("post /api/users throws 400 when field is missing", async () => {
+	test("POST /api/users throws 400 when field is missing", async () => {
 		assert.equal((await request(app).post("/api/users").send({ username: "", email: "mail@test.de", password: "password123" })).status, 400);
 		assert.equal((await request(app).post("/api/users").send({ username: "user1", email: "", password: "password123" })).status, 400);
 		assert.equal((await request(app).post("/api/users").send({ username: "user1", email: "mail@test.de", password: "" })).status, 400);
 	})
 
-	test("post /api/users throws 400 when input is of wrong type", async () => {
+	test("POST /api/users throws 400 when input is of wrong type", async () => {
 		const res = await request(app).post("/api/users").send({ username: 12, email: "mail@test.de", password: "password123" });
 		assert.equal(res.status, 400)
 	})
@@ -67,7 +67,7 @@ describe("usersRouter", () => {
 		assert.equal((await agent.put("/api/users/budget").send({})).status, 400);
 	});
 
-	test("delete /api/users returns 200 when successful", async () => {
+	test("DELETE /api/users returns 200 when successful", async () => {
 		const agent = request.agent(app);
 		await agent.post("/api/users").send(user);
 		await agent.post("/api/auth/login").send({ username: user.username, password: user.password });
@@ -81,7 +81,7 @@ describe("usersRouter", () => {
 		assert.equal(after.status, 401);
 	})
 
-	test("delete /api/users returns 401 when not logged in", async () => {
+	test("DELETE /api/users returns 401 when not logged in", async () => {
 		const deleted = await request(app).delete("/api/users");
 		assert.equal(deleted.status, 401);
 	})

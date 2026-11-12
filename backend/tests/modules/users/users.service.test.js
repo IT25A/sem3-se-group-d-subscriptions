@@ -7,7 +7,6 @@ const subscriptions = require("../../../src/modules/subscription/subscription.se
 const assert = require('node:assert/strict');
 const { describe,test, beforeEach, after } = require("node:test");
 const bcrypt = require("bcrypt");
-const subscriber = require("../../../src/modules/users/users.service");
 
 const user = { username: "user1", email: "mail@test.de", password: "password" };
 
@@ -76,13 +75,13 @@ describe("userService", () => {
 
 	test("deleteUser", async() => {
 		const created = await service.createUser(user);
-		const createdSub = await subscriptions.createSubscription({userId: created.id, subscription: "Netflix", price: 12, category: "Video-Streaming"});
+		const createdSub = await subscriptions.createSubscription({userId: created.id, subscription: "Netflix", price: 12, category: "Video-Streaming", date: "2026-12-11"});
 		const sub = await subscriptions.getSubscription({userId: created.id});
 		const deleted = await service.deleteUser(created.id);
 		const orphans = await all("SELECT * FROM SubscriptionModel WHERE id = ?", [createdSub.id]);
 		assert.equal(deleted.changes, 1)
 		assert.equal(await service.findById(created.id), undefined);
-		assert.deepEqual(sub, [{id: createdSub.id, subscription: "Netflix", price: 12, category: "Video-Streaming"}]);
+		assert.deepEqual(sub, [{id: createdSub.id, subscription: "Netflix", price: 12, category: "Video-Streaming", date: "2026-12-11"}]);
 		assert.deepEqual(orphans, []);
 	})
 })

@@ -2,22 +2,37 @@ import { useState } from "react";
 
 const CATEGORIES = ["Video-Streaming", "Music-Streaming", "Software", "Gaming", "News", "Fitness", "Other"];
 
+const PREDEFINED = new Set(CATEGORIES.filter((c) => c !== "Other"));
+
+function isCustomCategory(cat) {
+  return cat && !PREDEFINED.has(cat);
+}
+
 function AddSubscription({ onAdded, initialValues, onUpdated, notify }) {
   const isEdit = !!initialValues;
+
+  const initialCategory = initialValues?.category ?? "";
+  const initialIsCustom = isCustomCategory(initialCategory);
+
   const [form, setForm] = useState(
     initialValues
-      ? { subscription: initialValues.subscription, price: String(initialValues.price), category: initialValues.category }
+      ? { subscription: initialValues.subscription, price: String(initialValues.price), category: initialIsCustom ? "Other" : initialCategory }
       : { subscription: "", price: "", category: "" }
   );
+  const [customCategory, setCustomCategory] = useState(initialIsCustom ? initialCategory : "");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const resolvedCategory = form.category === "Other" ? (customCategory.trim() || "Other") : form.category;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    const payload = { ...form, category: resolvedCategory, price: parseFloat(form.price) };
 
     try {
       if (isEdit) {
@@ -25,21 +40,21 @@ function AddSubscription({ onAdded, initialValues, onUpdated, notify }) {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ ...form, price: parseFloat(form.price) }),
+          body: JSON.stringify(payload),
         });
         if (!res.ok) {
           const data = await res.json();
           notify?.(data.error || "Error saving subscription");
         } else {
           notify?.(`"${form.subscription}" updated`);
-          onUpdated?.({ ...initialValues, ...form, price: parseFloat(form.price) });
+          onUpdated?.({ ...initialValues, ...payload });
         }
       } else {
         const res = await fetch("/api/subscriptions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ ...form, price: parseFloat(form.price) }),
+          body: JSON.stringify(payload),
         });
 
         const data = await res.json();
@@ -49,6 +64,7 @@ function AddSubscription({ onAdded, initialValues, onUpdated, notify }) {
         } else {
           notify?.(`"${data.subscription}" added`);
           setForm({ subscription: "", price: "", category: "" });
+          setCustomCategory("");
           onAdded?.(data);
         }
       }
@@ -102,12 +118,20 @@ function AddSubscription({ onAdded, initialValues, onUpdated, notify }) {
                   <option key={c} value={c}>{c}</option>
               ))}
             </select>
+            {form.category === "Other" && (
+              <input
+                value={customCategory}
+                onChange={(e) => setCustomCategory(e.target.value)}
+                placeholder="Custom category (optional)"
+                className="w-full input-field mt-2"
+              />
+            )}
           </div>
 
           <button
               type="submit"
               disabled={loading}
-              className="btn-primary"
+              className="btn btn-primary"
           >
             {loading ? (isEdit ? "Saving…" : "Adding…") : (isEdit ? "Save" : "Add")}
           </button>

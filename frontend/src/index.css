@@ -11,6 +11,8 @@
     --width-content: 1140px;
     --gradient-bg: linear-gradient(to left, #0f0c29, #152331);
     --gradient-emerald: linear-gradient(to top, #064e3b, #047857);
+    --gradient-error: linear-gradient(to top,#b91c1c,#ef4444);
+    --gradient-alert: linear-gradient(to top,#b45309,#f59e0b);
     --color-btn-gray: #374151;
     --color-btn-gray-hover: #4b5563;
     --element-box-shadow: 0 2px 8px rgba(0,0,0,0.4);
@@ -92,18 +94,23 @@ body {
     .t-faint     { @apply text-gray-400; }
     .t-accent    { @apply text-emerald-800 dark:text-emerald-700; }
     .t-error     { @apply text-red-500; }
+    .t-alert     { @apply text-yellow-400; }
     .t-success   { @apply text-green-600 dark:text-green-400; }
 
     /* ── Buttons ─────────────────────────────────────────────── */
+    .btn {
+        @apply transform hover:scale-90 text-white font-medium rounded-xl px-4 py-2 text-sm cursor-pointer disabled:opacity-50;
+        transition: 0.25s;
+    }
+    .btn-sm {
+        @apply transform hover:scale-90 text-white font-medium rounded-xl px-4 py-1 text-sm cursor-pointer disabled:opacity-50;
+        transition: 0.25s;
+    }
     .btn-primary {
-        @apply transform hover:scale-90 text-white font-medium rounded-xl px-4 py-2 text-sm cursor-pointer
-        disabled:opacity-50;
         background: var(--gradient-emerald);
         transition: 0.25s;
     }
     .btn-secondary {
-        @apply transform hover:scale-90 cursor-pointer
-        dark:text-white rounded-xl px-4 py-2 text-sm;
         background: var(--color-btn-gray);
         transition: 0.25s;
     }
@@ -111,6 +118,9 @@ body {
     .btn-close {
         @apply transform hover:scale-90 text-gray-500 hover:text-gray-300 text-xl leading-none cursor-pointer;
         transition: 0.25s;
+    }
+    .btn-delete {
+        background: var(--gradient-error);
     }
 
     /* ── Form controls ───────────────────────────────────────── */
@@ -135,12 +145,11 @@ body {
         @apply transform hover:scale-95 cursor-pointer;
         transition: 0.25s;
     }
+    .icon-alert,
     .icon-delete:hover {
-        /* red-500 (#ef4444) */
-        filter: invert(37%) sepia(99%) saturate(749%) hue-rotate(323deg) brightness(104%) contrast(93%);
+        filter: brightness(0) saturate(100%) invert(23%) sepia(39%) saturate(6325%) hue-rotate(345deg) brightness(112%) contrast(97%);
     }
     .icon-edit:hover {
-        /* muted gray (#6a7282) */
         filter: invert(47%) sepia(5%) saturate(1445%) hue-rotate(182deg) brightness(91%) contrast(79%);
     }
 

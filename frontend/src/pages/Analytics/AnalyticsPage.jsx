@@ -1,24 +1,41 @@
 import { useEffect, useState } from "react";
+import Modal from "../../components/ui/Modal";
 import monthIcon from "../../assets/calendar-1.svg";
 import yearIcon from "../../assets/calendar-2.svg";
 import walletIcon from "../../assets/wallet.svg";
 import subscriptionIcon from "../../assets/currency.svg";
+import alertIcon from "../../assets/alert.svg";
 
-const CATEGORIES = ["Video-Streaming", "Music-Streaming", "Software", "Gaming", "News", "Fitness", "Sonstiges"];
-
-const CATEGORY_COLORS = {
-    "Video-Streaming":  "#228B22",
-    "Music-Streaming":  "#6495ED",
-    "Software":         "#9F2B68",
-    "Gaming":           "#D70040",
-    "News":             "#CC7722",
-    "Fitness":          "#275BF5",
-    "Sonstiges":        "#757575",
+const PRESET_COLORS = {
+    "Video-Streaming": "#228B22",
+    "Music-Streaming": "#6495ED",
+    "Software":        "#9F2B68",
+    "Gaming":          "#D70040",
+    "News":            "#CC7722",
+    "Fitness":         "#275BF5",
+    "Other":           "#757575",
 };
 
-function formatPrice(value) {
+const PALETTE = [
+    "#E63946", "#F4A261", "#2A9D8F", "#E9C46A", "#457B9D",
+    "#A8DADC", "#F72585", "#7209B7", "#3A0CA3", "#4CC9F0",
+    "#06D6A0", "#FFD166", "#EF476F", "#118AB2", "#073B4C",
+];
+
+function getCategoryColor(cat, allCategories) {
+    if (PRESET_COLORS[cat]) return PRESET_COLORS[cat];
+    const customCats = allCategories.filter((c) => !PRESET_COLORS[c]);
+    const idx = customCats.indexOf(cat);
+    return PALETTE[idx % PALETTE.length];
+}
+
+function formatPrice(value, smallCents) {
     const [euros, cents] = value.toFixed(2).split(".");
-    return `${euros}.${cents}`;
+    return (
+        <>
+            {euros}<span className={smallCents ? "text-base font-bold" : ""}>.{cents}</span>
+        </>
+    );
 }
 
 function StatCard({ icon, label, value }) {
@@ -39,19 +56,44 @@ function StatCard({ icon, label, value }) {
 }
 
 function CategoryBar({ label, amount, pct, color }) {
+    const [width, setWidth] = useState(0);
+
+    useEffect(() => {
+        const id = requestAnimationFrame(() => setWidth(pct));
+        return () => cancelAnimationFrame(id);
+    }, [pct]);
+
     return (
         <div className="flex items-center gap-3 mb-3">
-            <span className="text-xs t-secondary w-32 shrink-0 truncate">{label}</span>
+            <span className="text-sm t-secondary w-32 shrink-0 truncate">{label}</span>
             <div className="flex-1 bg-gray-700 rounded-full h-3 overflow-hidden">
                 <div
-                    className="h-3 rounded-full transition-all duration-500"
-                    style={{ width: `${pct}%`, background: color }}
+                    className="h-3 rounded-full transition-all duration-700"
+                    style={{ width: `${width}%`, background: color }}
                 />
             </div>
-            <span className="text-xs t-accent font-semibold w-16 text-right shrink-0">
+            <span className="text-sm t-accent font-semibold w-16 text-right shrink-0">
                 {formatPrice(amount)} €
             </span>
         </div>
+    );
+}
+
+function CategoryChartModal({ byCategory, allCategories, monthly, onClose }) {
+    return (
+        <Modal isOpen onClose={onClose} title="All categories" size="max-w-2xl">
+            <div className="max-h-[60vh] overflow-y-auto pr-1">
+                {byCategory.map(({ label, amount }) => (
+                    <CategoryBar
+                        key={label}
+                        label={label}
+                        amount={amount}
+                        pct={monthly > 0 ? (amount / monthly) * 100 : 0}
+                        color={getCategoryColor(label, allCategories)}
+                    />
+                ))}
+            </div>
+        </Modal>
     );
 }
 
@@ -59,6 +101,7 @@ function Analytics({ budget, refresh }) {
     const [subscriptions, setSubscriptions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showAllCategories, setShowAllCategories] = useState(false);
 
     useEffect(() => {
         setLoading(true);
@@ -78,16 +121,20 @@ function Analytics({ budget, refresh }) {
     const avgCost = count > 0 ? monthly / count : 0;
 
     const budgetUsedPct = budget && monthly > 0
-        ? Math.min(Math.round((monthly / Number(budget)) * 100), 100)
+        ? Math.round((monthly / Number(budget)) * 100)
         : null;
 
-    const byCategory = CATEGORIES.reduce((acc, cat) => {
-        const total = subscriptions
-            .filter((s) => s.category === cat)
-            .reduce((sum, s) => sum + Number(s.price), 0);
-        if (total > 0) acc.push({ label: cat, amount: total });
-        return acc;
-    }, []).sort((a, b) => b.amount - a.amount);
+    const byCategory = Object.entries(
+        subscriptions.reduce((acc, s) => {
+            const cat = s.category || "Other";
+            acc[cat] = (acc[cat] ?? 0) + Number(s.price);
+            return acc;
+        }, {})
+    )
+        .map(([label, amount]) => ({ label, amount }))
+        .sort((a, b) => b.amount - a.amount);
+
+    const allCategories = byCategory.map((c) => c.label);
 
     const mostExpensive = subscriptions.length
         ? [...subscriptions].sort((a, b) => Number(b.price) - Number(a.price))[0]
@@ -104,12 +151,12 @@ function Analytics({ budget, refresh }) {
                 <StatCard
                     icon={monthIcon}
                     label="Monthly costs"
-                    value={loading ? "…" : `${formatPrice(monthly)} €`}
+                    value={loading ? "…" : <>{formatPrice(monthly, true)} €</>}
                 />
                 <StatCard
                     icon={yearIcon}
                     label="Yearly costs"
-                    value={loading ? "…" : `${formatPrice(yearly)} €`}
+                    value={loading ? "…" : <>{formatPrice(yearly, true)} €</>}
                 />
                 <StatCard
                     icon={subscriptionIcon}
@@ -119,7 +166,7 @@ function Analytics({ budget, refresh }) {
                 <StatCard
                     icon={walletIcon}
                     label="Avg. cost / subscription"
-                    value={loading ? "…" : `${formatPrice(avgCost)} €`}
+                    value={loading ? "…" : <>{formatPrice(avgCost, true)} €</>}
                 />
             </div>
 
@@ -132,45 +179,65 @@ function Analytics({ budget, refresh }) {
                     ) : byCategory.length === 0 ? (
                         <p className="t-muted text-sm">No subscriptions yet.</p>
                     ) : (
-                        byCategory.map(({ label, amount }) => (
-                            <CategoryBar
-                                key={label}
-                                label={label}
-                                amount={amount}
-                                pct={monthly > 0 ? (amount / monthly) * 100 : 0}
-                                color={CATEGORY_COLORS[label] ?? "#047857"}
-                            />
-                        ))
+                        <>
+                            {byCategory.slice(0, 6).map(({ label, amount }) => (
+                                <CategoryBar
+                                    key={label}
+                                    label={label}
+                                    amount={amount}
+                                    pct={monthly > 0 ? (amount / monthly) * 100 : 0}
+                                    color={getCategoryColor(label, allCategories)}
+                                />
+                            ))}
+                            {byCategory.length > 6 && (
+                                <button
+                                    className="btn-sm btn-secondary"
+                                    onClick={() => setShowAllCategories(true)}
+                                >
+                                    + {byCategory.length - 6} more
+                                </button>
+                            )}
+                        </>
                     )}
                 </div>
+                {showAllCategories && (
+                    <CategoryChartModal
+                        byCategory={byCategory}
+                        allCategories={allCategories}
+                        monthly={monthly}
+                        onClose={() => setShowAllCategories(false)}
+                    />
+                )}
 
                 <div className="flex flex-col gap-4">
                     {/* Budget usage gauge */}
                     <div className="card p-6">
                         <h3 className="text-lg font-semibold t-primary mb-3">Budget usage</h3>
-                        {budget == null ? (
+                        {budget === 0 ? (
                             <p className="t-muted text-sm">No budget set.</p>
                         ) : (
                             <>
-                                <div className="flex justify-between text-xs t-muted mb-1">
+                                <div className="flex justify-between text-sm t-muted mb-1">
                                     <span>{formatPrice(monthly)} € spent</span>
                                     <span>{formatPrice(Number(budget))} € budget</span>
                                 </div>
-                                <div className="bg-gray-700 rounded-full h-4 overflow-hidden mb-2">
+                                <div className="bg-gray-700 rounded-full h-4 overflow-hidden mt-2 mb-2">
                                     <div
                                         className="h-4 rounded-full transition-all duration-700"
                                         style={{
-                                            width: `${budgetUsedPct}%`,
-                                            background: budgetUsedPct >= 100
-                                                ? "linear-gradient(to right,#b91c1c,#ef4444)"
+                                            width: `${Math.min(budgetUsedPct, 100)}%`,
+                                            background: budgetUsedPct >= 95
+                                                ? "var(--gradient-error)"
                                                 : budgetUsedPct >= 75
-                                                    ? "linear-gradient(to right,#b45309,#f59e0b)"
+                                                    ? "var(--gradient-alert)"
                                                     : "var(--gradient-emerald)",
                                         }}
                                     />
                                 </div>
-                                <p className={`text-xs font-semibold ${budgetUsedPct >= 100 ? "t-error" : budgetUsedPct >= 75 ? "text-yellow-400" : "t-success"}`}>
-                                    {budgetUsedPct}% of budget used
+                                <p className={`text-sm font-semibold flex items-center ${budgetUsedPct >= 95 ? "t-error" : budgetUsedPct >= 75 ? "t-alert" : "t-success"}`}>
+                                    {budgetUsedPct > 100
+                                        ? <><img src={alertIcon} alt={"alert"} className="icon icon-alert mr-2" /> Budget exceeded by {formatPrice(monthly - Number(budget))} €</>
+                                        : `${budgetUsedPct}% of budget used`}
                                 </p>
                             </>
                         )}
@@ -188,7 +255,7 @@ function Analytics({ budget, refresh }) {
                                     <p className="text-xs t-muted mt-0.5">{mostExpensive.category}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-2xl font-bold t-accent">{formatPrice(Number(mostExpensive.price))} €</p>
+                                    <p className="text-2xl font-bold t-accent">{formatPrice(Number(mostExpensive.price), true)} €</p>
                                     <p className="text-xs t-muted">/ month</p>
                                 </div>
                             </div>
@@ -223,7 +290,7 @@ function Analytics({ budget, refresh }) {
                                             <td className="py-2.5">
                                         <span
                                             className="inline-block w-2.5 h-2.5 rounded-full mr-2 align-middle"
-                                            style={{ background: CATEGORY_COLORS[label] ?? "#047857" }}
+                                            style={{ background: getCategoryColor(label, allCategories) }}
                                         />
                                                 <span className="t-primary">{label}</span>
                                             </td>

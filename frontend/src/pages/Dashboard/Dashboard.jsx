@@ -13,8 +13,11 @@ function Dashboard({ budget, onBudgetChange, refresh, notify }) {
 
     useEffect(() => {
         fetch("/api/subscriptions", { credentials: "include" })
-            .then((res) => {
-                if (!res.ok) throw new Error("Error loading subscriptions.");
+            .then(async (res) => {
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    throw new Error(data.error || "Error loading subscriptions.");
+                }
                 return res.json();
             })
             .then((data) => {
@@ -38,14 +41,17 @@ function Dashboard({ budget, onBudgetChange, refresh, notify }) {
                 credentials: "include",
                 body: JSON.stringify({ budget: parseFloat(budgetInput) }),
             });
-            if (!res.ok) throw new Error("Fehler beim Speichern");
             const data = await res.json();
+            if (!res.ok) {
+                notify?.(data.error || "Error saving budget");
+                return;
+            }
             onBudgetChange(data.budget);
             setBudgetInput("");
             setEditingBudget(false);
             notify?.("Budget updated successfully");
-        } catch (err) {
-            notify?.(err.message);
+        } catch {
+            notify?.("Network error");
         } finally {
             setBudgetLoading(false);
         }
@@ -132,7 +138,7 @@ function Dashboard({ budget, onBudgetChange, refresh, notify }) {
                                     required
                                     className="w-24 input-field"
                                 />
-                                <button type="submit" disabled={budgetLoading} className="btn-primary">
+                                <button type="submit" disabled={budgetLoading} className="btn btn-primary">
                                     {budgetLoading ? "…" : "OK"}
                                 </button>
                                 <button
@@ -159,7 +165,7 @@ function Dashboard({ budget, onBudgetChange, refresh, notify }) {
                         ) : (
                             <button
                                 onClick={() => { setBudgetInput(""); setEditingBudget(true); }}
-                                className="btn-primary mt-1"
+                                className="btn btn-primary mt-1"
                             >
                                 Setzen
                             </button>

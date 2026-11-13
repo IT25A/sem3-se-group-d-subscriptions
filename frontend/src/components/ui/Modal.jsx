@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import ReactDOM from "react-dom";
 
-function Modal({ isOpen, onClose, title, children }) {
+function Modal({ isOpen, onClose, title, size, children }) {
     useEffect(() => {
         if (!isOpen) return;
         const onKey = (e) => { if (e.key === "Escape") onClose(); };
@@ -22,7 +22,7 @@ function Modal({ isOpen, onClose, title, children }) {
             onClick={onClose}
         >
             <div
-                className="card w-full max-w-md mx-4 p-6 relative"
+                className={`card w-full ${size ?? "max-w-md"} p-6 relative`}
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex items-center justify-between mb-4">

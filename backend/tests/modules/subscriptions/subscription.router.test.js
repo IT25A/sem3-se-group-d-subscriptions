@@ -1,4 +1,5 @@
 process.env.DB_PATH = ":memory:";
+process.env.SESSION_SECRET = "test-secret";
 
 const assert = require('node:assert/strict');
 const { describe,test, beforeEach, after } = require("node:test");

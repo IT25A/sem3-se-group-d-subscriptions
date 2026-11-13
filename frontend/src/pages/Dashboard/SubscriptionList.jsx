@@ -28,12 +28,16 @@ function SubscriptionList({ refresh, onDeleted, onAdded, notify }) {
         method: "DELETE",
         credentials: "include",
       });
-      if (!res.ok) throw new Error("Error deleting subscription");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        notify?.(data.error || "Error deleting subscription");
+        return;
+      }
       setSubscriptions((prev) => prev.filter((s) => s.id !== id));
       onDeleted?.();
       notify?.(`"${name}" deleted`);
-    } catch (err) {
-      notify?.(err.message);
+    } catch {
+      notify?.("Network error");
     } finally {
       setDeletingId(null);
     }
@@ -48,8 +52,11 @@ function SubscriptionList({ refresh, onDeleted, onAdded, notify }) {
   useEffect(() => {
     setLoading(true);
     fetch("/api/subscriptions", { credentials: "include" })
-        .then((res) => {
-          if (!res.ok) throw new Error("Error loading subscriptions");
+        .then(async (res) => {
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.error || "Error loading subscriptions");
+          }
           return res.json();
         })
         .then((data) => {

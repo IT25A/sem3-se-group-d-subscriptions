@@ -106,7 +106,7 @@ function App() {
                     <Analytics budget={budget} refresh={refresh} />
                 )}
                 {activePage === "Notifications" && (
-                    <NotificationsPage />
+                    <NotificationsPage onCountChange={setNotificationCount} />
                 )}
                 {activePage === "Compare" && (
                     <ComparisonPage />

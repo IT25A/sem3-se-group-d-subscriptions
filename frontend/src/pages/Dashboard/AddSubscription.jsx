@@ -16,8 +16,8 @@ function AddSubscription({ onAdded, initialValues, onUpdated, notify }) {
 
   const [form, setForm] = useState(
     initialValues
-      ? { subscription: initialValues.subscription, price: String(initialValues.price), category: initialIsCustom ? "Other" : initialCategory }
-      : { subscription: "", price: "", category: "" }
+      ? { subscription: initialValues.subscription, price: String(initialValues.price), category: initialIsCustom ? "Other" : initialCategory, date: initialValues.date ?? "" }
+      : { subscription: "", price: "", category: "", date: "" }
   );
   const [customCategory, setCustomCategory] = useState(initialIsCustom ? initialCategory : "");
   const [loading, setLoading] = useState(false);
@@ -126,6 +126,17 @@ function AddSubscription({ onAdded, initialValues, onUpdated, notify }) {
                 className="w-full input-field mt-2"
               />
             )}
+          </div>
+
+          <div>
+            <label className="block text-sm t-secondary mb-1">Billing day</label>
+            <input
+                name="date"
+                type="date"
+                value={form.date}
+                onChange={handleChange}
+                className="w-full input-field"
+            />
           </div>
 
           <button

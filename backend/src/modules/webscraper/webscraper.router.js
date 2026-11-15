@@ -19,19 +19,6 @@ const { getDatingNamesAndPrices } = require("./Dating/nameAndPrice");
 const { getAudioBookOffers } = require("./AudioBook/allSubscriptions");
 const { getAudioBookNamesAndPrices } = require("./AudioBook/nameAndPrice");
 
-/* 
-Erste Möglichekit - mehr Code, aber einfacher 
-router.get("/video", async (req, res) => {
-    try {
-        const offers = await getVideoOffers();
-        res.json(offers);
-    } catch (err) {
-        res.status(500).json({ error: "Scraping failed" });
-    }
-});
-
-*/
-
 const nameAndPriceHandlers = {
     video:     getVideoNamesAndPrices,
     music:     getMusicNamesAndPrices,

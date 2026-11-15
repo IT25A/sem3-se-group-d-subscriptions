@@ -10,7 +10,7 @@ import notificationIcon from "../../assets/notification.svg";
 import Modal from "../ui/Modal.jsx";
 import Settings from "../../pages/Settings/Settings.jsx";
 
-function Sidebar({ user, onLogout, activePage, onNavigate }) {
+function Sidebar({ user, onLogout, activePage, onNavigate, notificationCount = 0 }) {
     const [showSettings, setShowSettings] = useState(false);
     const navItems = [
         { icon: dashboardIcon, label: "Dashboard" },
@@ -35,7 +35,12 @@ function Sidebar({ user, onLogout, activePage, onNavigate }) {
                             onClick={() => onNavigate?.(item.label)}
                             className={activePage === item.label ? "sidebar-nav-item active" : "sidebar-nav-item"}
                         >
-                            <img src={item.icon} alt={item.label} className="icon icon-white"/>
+                            <span className="relative inline-flex">
+                                <img src={item.icon} alt={item.label} className="icon icon-white"/>
+                                {item.label === "Notifications" && notificationCount > 0 && (
+                                    <span className="absolute bottom-0 -right-1 w-2 h-2 rounded-full bg-red-500" />
+                                )}
+                            </span>
                             {item.label}
                         </button>
                     ))}

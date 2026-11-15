@@ -7,6 +7,7 @@ import ComparisonPage from "./pages/Comparison/ComparisonPage.jsx";
 import Sidebar from "./components/layout/Sidebar.jsx";
 import { Notification } from "./components/ui/Notification.jsx";
 import NotificationsPage from "./pages/Notifications/NotificationsPage.jsx";
+import { checkAndCreateNotifications } from "./pages/Notifications/notifications.service.js";
 
 function App() {
     const [user, setUser] = useState(null);
@@ -15,6 +16,14 @@ function App() {
     const [budget, setBudget] = useState(null);
     const [activePage, setActivePage] = useState("Dashboard");
     const [notification, setNotification] = useState("");
+    const [notificationCount, setNotificationCount] = useState(0);
+
+    function refreshNotificationCount() {
+        fetch("/api/notifications", { credentials: "include" })
+            .then(r => r.ok ? r.json() : [])
+            .then(data => setNotificationCount(Array.isArray(data) ? data.length : 0))
+            .catch(() => setNotificationCount(0));
+    }
 
     useEffect(() => {
         fetch("/api/auth/session", { credentials: "include" })
@@ -22,6 +31,9 @@ function App() {
             .then((data) => {
                 setUser(data);
                 setBudget(data?.budget ?? null);
+                if (data) {
+                    checkAndCreateNotifications().then(refreshNotificationCount);
+                }
             })
             .catch(() => setUser(null))
             .finally(() => setLoading(false));
@@ -46,6 +58,7 @@ function App() {
     const handleLogin = (data) => {
         setUser(data);
         setBudget(data?.budget ?? null);
+        checkAndCreateNotifications().then(refreshNotificationCount);
     };
 
     if (!user) {
@@ -55,7 +68,10 @@ function App() {
     return (
         <div className="app-layout">
             <Notification message={notification} onDone={() => setNotification("")} />
-            <Sidebar user={user} onLogout={handleLogout} activePage={activePage} onNavigate={setActivePage} />
+            <Sidebar user={user} onLogout={handleLogout} activePage={activePage} onNavigate={(page) => {
+                setActivePage(page);
+                if (page === "Notifications") setNotificationCount(0);
+            }} notificationCount={notificationCount} />
             <main className="main-content">
                 <div className="main-header container-md">
                     <h1 className="text-2xl font-bold t-primary">

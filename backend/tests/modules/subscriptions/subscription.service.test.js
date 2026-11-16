@@ -1,4 +1,5 @@
 process.env.DB_PATH = ":memory:";
+process.env.SESSION_SECRET = "test-secret";
 
 const { db, run } = require("../../../src/database");
 const service = require("../../../src/modules/subscription/subscription.service");

@@ -79,35 +79,18 @@ function CategoryBar({ label, amount, pct, color }) {
     );
 }
 
-function PaymentRow({ id, name, category, price, payDay, payment, onToggle, showAlertColumn }) {
-    const currentMonth = new Date().toISOString().slice(0, 7);
-    const isPaid = payment === currentMonth;
-    const isOverdue = !isPaid && payDay < new Date().getDate();
-
+function PaymentRow({ name, category, price, payDay }) {
     return (
-        <div className={`flex items-center justify-between py-3 border-b border-gray-700/50 last:border-0 ${isPaid ? "opacity-50" : ""}`}>
-            {showAlertColumn && (
-                <div className="w-6 shrink-0 mr-2">
-                    {isOverdue && <img src={alertIcon} alt="overdue" className="icon icon-alert w-5 h-5" />}
-                </div>
-            )}
+        <div className="flex items-center justify-between py-3 border-b border-gray-700/50 last:border-0">
             <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium t-primary truncate">{name}</p>
                 <p className="text-xs t-muted mt-0.5">
                     {category} · Fällig am: {payDay}. {new Date().toLocaleString("de-DE", { month: "long" })}
                 </p>
             </div>
-            <div className="flex items-center gap-3 shrink-0 ml-3">
-                <p className={`text-sm font-semibold ${isPaid ? "t-secondary" : "t-accent"}`}>
-                    {formatPrice(price)} €
-                </p>
-                <input
-                    type="checkbox"
-                    checked={isPaid}
-                    onChange={() => onToggle(id, !isPaid)}
-                    className="w-4 h-4 cursor-pointer accent-emerald-500"
-                />
-            </div>
+            <p className="text-sm font-semibold t-accent shrink-0 ml-3">
+                {formatPrice(price)} €
+            </p>
         </div>
     );
 }
@@ -137,35 +120,8 @@ function Analytics({ budget, refresh }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showAllCategories, setShowAllCategories] = useState(false);
-    const [paymentTab, setPaymentTab] = useState("due");
 
-    async function handleTogglePaid(id, paid) {
-        await fetch(`/api/subscriptions/${id}/payment`, {
-            method: "PATCH",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ paid }),
-        });
-        setSubscriptions((prev) =>
-            prev.map((s) =>
-                s.id === id
-                    ? { ...s, payment: paid ? new Date().toISOString().slice(0, 7) : null }
-                    : s
-            )
-        );
-        if (paid) {
-            const sub = subscriptions.find(s => s.id === id);
-            if (sub) {
-                const notifs = await fetch("/api/notifications", { credentials: "include" }).then(r => r.json()).catch(() => []);
-                const matching = notifs.filter(n => n.message.includes(`"${sub.subscription}"`));
-                for (const n of matching) {
-                    await fetch(`/api/notifications/${n.id}`, { method: "DELETE", credentials: "include" });
-                }
-            }
-        }
-    }
-
-    useEffect(() => {
+useEffect(() => {
         setLoading(true);
         fetch("/api/subscriptions", { credentials: "include" })
             .then((res) => {
@@ -202,16 +158,10 @@ function Analytics({ budget, refresh }) {
         ? [...subscriptions].sort((a, b) => Number(b.price) - Number(a.price))[0]
         : null;
 
-    const todayDate = new Date().getDate();
     const upcomingSorted = [...subscriptions]
         .filter((s) => s.date)
         .map((s) => ({ ...s, payDay: new Date(s.date).getDate() }))
         .sort((a, b) => a.payDay - b.payDay);
-
-    const currentMonth = new Date().toISOString().slice(0, 7);
-    const stillDue = upcomingSorted.filter((s) => s.payment !== currentMonth);
-    const alreadyPaid = upcomingSorted.filter((s) => s.payment === currentMonth);
-    const hasOverdue = stillDue.some((s) => s.payDay < todayDate);
 
     return (
         <div className="container-md mt-6 pb-10">
@@ -383,57 +333,16 @@ function Analytics({ budget, refresh }) {
             {/* Monthly payment schedule */}
             {!loading && subscriptions.length > 0 && (
                 <div className="card p-6 mt-4 lg:w-1/2">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xl font-semibold t-primary">Monthly payments</h3>
-                        <div className="flex gap-1 text-xs t-muted border border-gray-700 rounded-lg overflow-hidden">
-                            <button
-                                className={`px-3 py-1 ${paymentTab === "due" ? "bg-gray-700 t-primary font-medium" : "hover:bg-gray-700/50"}`}
-                                onClick={() => setPaymentTab("due")}
-                            >
-                                Due {hasOverdue && <img src={alertIcon} alt="overdue" className="icon icon-alert w-3 h-3 ml-0.5 inline" />}
-                            </button>
-                            <button
-                                className={`px-3 py-1 ${paymentTab === "paid" ? "bg-gray-700 t-primary font-medium" : "hover:bg-gray-700/50"}`}
-                                onClick={() => setPaymentTab("paid")}
-                            >
-                                Paid
-                            </button>
-                        </div>
-                    </div>
-
-                    {paymentTab === "due" ? (
-                        stillDue.length === 0
-                            ? <p className="text-sm t-muted">All payments done for this month.</p>
-                            : stillDue.map((s) => (
-                                <PaymentRow
-                                    key={s.id}
-                                    id={s.id}
-                                    name={s.subscription}
-                                    category={s.category}
-                                    price={Number(s.price)}
-                                    payDay={s.payDay}
-                                    payment={s.payment}
-                                    onToggle={handleTogglePaid}
-                                    showAlertColumn={hasOverdue}
-                                />
-                            ))
-                    ) : (
-                        alreadyPaid.length === 0
-                            ? <p className="text-sm t-muted">Nothing paid yet this month.</p>
-                            : alreadyPaid.map((s) => (
-                                <PaymentRow
-                                    key={s.id}
-                                    id={s.id}
-                                    name={s.subscription}
-                                    category={s.category}
-                                    price={Number(s.price)}
-                                    payDay={s.payDay}
-                                    payment={s.payment}
-                                    onToggle={handleTogglePaid}
-                                    showAlertColumn={false}
-                                />
-                            ))
-                    )}
+                    <h3 className="text-xl font-semibold t-primary mb-4">Monthly payments</h3>
+                    {upcomingSorted.map((s) => (
+                        <PaymentRow
+                            key={s.id}
+                            name={s.subscription}
+                            category={s.category}
+                            price={Number(s.price)}
+                            payDay={s.payDay}
+                        />
+                    ))}
                 </div>
             )}
         </div>

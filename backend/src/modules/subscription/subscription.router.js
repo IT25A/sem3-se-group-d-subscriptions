@@ -121,24 +121,4 @@ router.put("/:id", async (req, res) => {
     }
 })
 
-router.patch("/:id/payment", async (req, res) => {
-    if (!req.session.userId) {
-        return res.status(401).json({ error: "User not logged in" });
-    }
-    const id = Number(req.params.id);
-    const { paid } = req.body;
-    const paymentMonth = paid
-        ? new Date().toISOString().slice(0, 7)
-        : null;
-    try {
-        const result = await service.setPayment({
-            userId: req.session.userId, id, paymentMonth });
-        if (result.changes === 0)
-            return res.status(404).json({ error: "Subscription not found" });
-        res.status(200).json({ success: true, paymentMonth });
-    } catch (err) {
-        res.status(500).json({ error: "Failed to update payment" });
-    }
-})
-
 module.exports = router;

@@ -6,8 +6,7 @@ import Analytics from "./pages/Analytics/AnalyticsPage.jsx";
 import ComparisonPage from "./pages/Comparison/ComparisonPage.jsx";
 import Sidebar from "./components/layout/Sidebar.jsx";
 import { Notification } from "./components/ui/Notification.jsx";
-import NotificationsPage from "./pages/Notifications/NotificationsPage.jsx";
-import { checkAndCreateNotifications } from "./pages/Notifications/notifications.service.js";
+import NotificationsPage, { checkAndCreateNotifications } from "./pages/Notifications/NotificationsPage.jsx";
 
 function App() {
     const [user, setUser] = useState(null);

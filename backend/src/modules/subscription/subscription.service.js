@@ -17,7 +17,7 @@ async function createSubscription({ userId, subscription, price, category, date 
 
 async function getSubscription({ userId }) {
     return await all(
-        "SELECT id, subscription, price, category, date, payment FROM SubscriptionModel WHERE userid = ?",
+        "SELECT id, subscription, price, category, date FROM SubscriptionModel WHERE userid = ?",
         [userId]
     );
 }
@@ -41,13 +41,4 @@ async function updateSubscription({ userId, id, subscription, price, category, d
     }
 }
 
-async function setPayment({ userId, id, paymentMonth }) {
-    const { changes } = await run(
-        "UPDATE SubscriptionModel SET payment = ? WHERE userid = ? AND id = ?",
-        [paymentMonth, userId, id]
-    );
-    return { id, changes };
-}
-
-
-module.exports = {ConflictError,setPayment, createSubscription, getSubscription, deleteSubscription, updateSubscription};
+module.exports = {ConflictError, createSubscription, getSubscription, deleteSubscription, updateSubscription};

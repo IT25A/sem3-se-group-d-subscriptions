@@ -8,7 +8,6 @@ module.exports = (db) => {
             
             subscription    TEXT    NOT NULL,
             category        TEXT    NOT NULL,
-            payment         TEXT    DEFAULT NULL,
             UNIQUE(userid, subscription)
         )
     `);

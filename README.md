@@ -1,5 +1,4 @@
 <div align="center">
-  <br>
   <img src="frontend/src/assets/logo.png" width="150" alt="PENNYwise Logo">
 
   # PENNYwise Spending Tracker
@@ -63,11 +62,11 @@ Open your browser at **http://localhost:5173/**
 
 ## Scripts
 
-| Command          | Description                                    |
-| ---------------- | ---------------------------------------------- |
-| `npm run dev`    | Start frontend and backend in development mode |
-| `npm test`       | Run all tests (backend + frontend)             |
-| `npm run build`  | Build the frontend for production              |
+| Command         | Description                                    |
+|-----------------|------------------------------------------------|
+| `npm run dev`   | Start frontend and backend in development mode |
+| `node --test`   | Run all tests                                  |
+| `npm run build` | Build the frontend for production              |
 
 ---
 
@@ -79,4 +78,3 @@ Open your browser at **http://localhost:5173/**
 | Backend  | Node.js, Express            |
 | Database | SQLite                      |
 | Auth     | express-session, bcrypt     |
-<br>

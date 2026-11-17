@@ -81,14 +81,14 @@ function App() {
                     <>
                         <Dashboard
                             budget={budget}
-                            onBudgetChange={setBudget}
+                            onBudgetChange={(b) => { setBudget(b); checkAndCreateNotifications().then(refreshNotificationCount); }}
                             refresh={refresh}
                             notify={setNotification}
                         />
                         <SubscriptionList
                             refresh={refresh}
-                            onDeleted={() => setRefresh((r) => r + 1)}
-                            onAdded={() => setRefresh((r) => r + 1)}
+                            onDeleted={() => { setRefresh((r) => r + 1); checkAndCreateNotifications().then(refreshNotificationCount); }}
+                            onAdded={() => { setRefresh((r) => r + 1); checkAndCreateNotifications().then(refreshNotificationCount); }}
                             notify={setNotification}
                         />
                     </>
@@ -96,8 +96,8 @@ function App() {
                 {activePage === "Subscriptions" && (
                     <SubscriptionList
                         refresh={refresh}
-                        onDeleted={() => setRefresh((r) => r + 1)}
-                        onAdded={() => setRefresh((r) => r + 1)}
+                        onDeleted={() => { setRefresh((r) => r + 1); checkAndCreateNotifications().then(refreshNotificationCount); }}
+                        onAdded={() => { setRefresh((r) => r + 1); checkAndCreateNotifications().then(refreshNotificationCount); }}
                         notify={setNotification}
                     />
                 )}

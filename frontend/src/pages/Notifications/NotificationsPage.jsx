@@ -57,6 +57,14 @@ export async function checkAndCreateNotifications() {
 
         if (budget > 0) {
             const monthly = subs.reduce((sum, s) => sum + Number(s.price), 0);
+            // Budget Notification löschen -> um sie neu zu schikcen (mit akt. Werten)
+            const oldBudgetNotifs = existingNotifs.filter(n =>
+                n.message.includes("Over budget") || n.message.includes("Almost reached budget")
+            );
+            await Promise.all(oldBudgetNotifs.map(n =>
+                fetch(`/api/notifications/${n.id}`, { method: "DELETE", credentials: "include" })
+            ));
+
             if (monthly > budget) {
                 const alreadyExists = existingNotifs.some(n => n.message.includes("Over budget"));
                 if (!alreadyExists) {
@@ -96,10 +104,8 @@ function NotificationsPage({ onCountChange }) {
     }
     //Schaut ob eine neue Notification erstellt werden muss
     useEffect(() => {
-        setLoading(true);
-        checkAndCreateNotifications().then(() => loadNotifications());
+        loadNotifications();
     }, []);
-
     async function handleDelete(id) {
         await fetch(`/api/notifications/${id}`, {
             method: "DELETE",

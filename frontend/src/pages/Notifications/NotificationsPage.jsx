@@ -22,6 +22,35 @@ export async function checkAndCreateNotifications() {
             fetch("/api/notifications", { credentials: "include" }).then(r => r.ok ? r.json() : []).catch(() => []),
         ]);
 
+        for (const s of subs) {
+            if (!s.date) continue;
+
+            const today = new Date();
+            const currentDay = today.getDate();
+            const billingDay = new Date(s.date).getUTCDate();
+
+            let difference = billingDay - currentDay;
+
+            if (difference < 0) {
+                const daysInCurrentMonth = new Date(
+                    today.getFullYear(),
+                    today.getMonth() + 1,
+                    0
+                ).getDate();
+                difference = daysInCurrentMonth - currentDay + billingDay;
+            }
+
+            if (difference >= 0 && difference < 5) {
+                const message = `Payment for ${s.subscription} is due in ${difference} days`;
+                const exists = existingNotifs.some(n =>
+                    n.message === message
+                );
+                if (!exists) {
+                    await postNotification(message);
+                }
+            }
+        }
+
         // Budget überschritten oder fast erreicht
         const session = await fetch("/api/auth/session", { credentials: "include" }).then(r => r.json()).catch(() => null);
         const budget = session?.budget ? Number(session.budget) : 0;
@@ -29,17 +58,17 @@ export async function checkAndCreateNotifications() {
         if (budget > 0) {
             const monthly = subs.reduce((sum, s) => sum + Number(s.price), 0);
             if (monthly > budget) {
-                const alreadyExists = existingNotifs.some(n => n.message.includes("Budget überschritten"));
+                const alreadyExists = existingNotifs.some(n => n.message.includes("Over budget"));
                 if (!alreadyExists) {
                     await postNotification(
-                        `Budget überschritten - monatliche Kosten (${monthly.toFixed(2)} €) übersteigen dein Budget (${budget.toFixed(2)} €)`
+                        `Over budget - monthly costs (${monthly.toFixed(2)} €) run over budget (${budget.toFixed(2)} €)`
                     );
                 }
             } else if (monthly >= budget * 0.8) {
-                const alreadyExists = existingNotifs.some(n => n.message.includes("Budget fast erreicht"));
+                const alreadyExists = existingNotifs.some(n => n.message.includes("Almost reached budget"));
                 if (!alreadyExists) {
                     await postNotification(
-                        `Budget fast erreicht - monatliche Kosten (${monthly.toFixed(2)} €) erreichen ${Math.round((monthly / budget) * 100)}% deines Budgets (${budget.toFixed(2)} €)`
+                        `Almost reached budget - monthly costs (${monthly.toFixed(2)} €) reach ${Math.round((monthly / budget) * 100)}% of your budget (${budget.toFixed(2)} €)`
                     );
                 }
             }

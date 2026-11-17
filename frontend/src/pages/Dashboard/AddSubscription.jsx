@@ -13,11 +13,12 @@ function AddSubscription({ onAdded, initialValues, onUpdated, notify }) {
 
   const initialCategory = initialValues?.category ?? "";
   const initialIsCustom = isCustomCategory(initialCategory);
+  const date = new Date().toISOString().split("T")[0];
 
   const [form, setForm] = useState(
     initialValues
-      ? { subscription: initialValues.subscription, price: String(initialValues.price), category: initialIsCustom ? "Other" : initialCategory, date: initialValues.date ?? "" }
-      : { subscription: "", price: "", category: "", date: "" }
+      ? { subscription: initialValues.subscription, price: String(initialValues.price), category: initialIsCustom ? "Other" : initialCategory, date: initialValues.date ?? date }
+      : { subscription: "", price: "", category: "", date: date }
   );
   const [customCategory, setCustomCategory] = useState(initialIsCustom ? initialCategory : "");
   const [loading, setLoading] = useState(false);

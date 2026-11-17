@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import alertIcon from "../../assets/alert.svg";
+import { AlertIcon } from "../assets/icons.jsx";
 
 let isRunning = false;
 
@@ -16,7 +16,7 @@ export async function checkAndCreateNotifications() {
     if (isRunning) return;
     isRunning = true;
     try {
-        //holt einmal alle abos des users und alle bereits vorhandenen notificationen
+        {/* Gets all the subscriptions and all existing notifications */}
         const [subs, existingNotifs] = await Promise.all([
             fetch("/api/subscriptions", { credentials: "include" }).then(r => r.ok ? r.json() : []).catch(() => []),
             fetch("/api/notifications", { credentials: "include" }).then(r => r.ok ? r.json() : []).catch(() => []),
@@ -40,45 +40,47 @@ export async function checkAndCreateNotifications() {
                 difference = daysInCurrentMonth - currentDay + billingDay;
             }
 
-            if (difference >= 0 && difference < 5) {
-                const message = `Payment for ${s.subscription} is due in ${difference} days`;
-                const exists = existingNotifs.some(n =>
-                    n.message === message
-                );
-                if (!exists) {
-                    await postNotification(message);
-                }
+            const stalePaymentNotifs = existingNotifs.filter(n =>
+                n.message.startsWith(`Payment for ${s.subscription} is due in`)
+            );
+            await Promise.all(stalePaymentNotifs.map(n =>
+                fetch(`/api/notifications/${n.id}`, { method: "DELETE", credentials: "include" })
+            ));
+
+            if (difference > 0 && difference <= 5) {
+                const dayLabel = difference === 1 ? "day" : "days";
+                const message = `Payment for ${s.subscription} is due in ${difference} ${dayLabel}`;
+                await postNotification(message);
             }
         }
 
-        // Budget überschritten oder fast erreicht
+        {/* Over Budget or close to reaching it */}
         const session = await fetch("/api/auth/session", { credentials: "include" }).then(r => r.json()).catch(() => null);
         const budget = session?.budget ? Number(session.budget) : 0;
 
         if (budget > 0) {
             const monthly = subs.reduce((sum, s) => sum + Number(s.price), 0);
-            // Budget Notification löschen -> um sie neu zu schikcen (mit akt. Werten)
-            const oldBudgetNotifs = existingNotifs.filter(n =>
-                n.message.includes("Over budget") || n.message.includes("Almost reached budget")
-            );
-            await Promise.all(oldBudgetNotifs.map(n =>
-                fetch(`/api/notifications/${n.id}`, { method: "DELETE", credentials: "include" })
-            ));
 
             if (monthly > budget) {
-                const alreadyExists = existingNotifs.some(n => n.message.includes("Over budget"));
-                if (!alreadyExists) {
-                    await postNotification(
-                        `Over budget - monthly costs (${monthly.toFixed(2)} €) run over budget (${budget.toFixed(2)} €)`
-                    );
-                }
+                const oldBudgetNotifs = existingNotifs.filter(n =>
+                    n.message.includes("Over budget") || n.message.includes("Almost reached budget")
+                );
+                await Promise.all(oldBudgetNotifs.map(n =>
+                    fetch(`/api/notifications/${n.id}`, { method: "DELETE", credentials: "include" })
+                ));
+                await postNotification(
+                    `Over budget - monthly costs (${monthly.toFixed(2)} €) run over budget (${budget.toFixed(2)} €)`
+                );
             } else if (monthly >= budget * 0.8) {
-                const alreadyExists = existingNotifs.some(n => n.message.includes("Almost reached budget"));
-                if (!alreadyExists) {
-                    await postNotification(
-                        `Almost reached budget - monthly costs (${monthly.toFixed(2)} €) reach ${Math.round((monthly / budget) * 100)}% of your budget (${budget.toFixed(2)} €)`
-                    );
-                }
+                const oldBudgetNotifs = existingNotifs.filter(n =>
+                    n.message.includes("Over budget") || n.message.includes("Almost reached budget")
+                );
+                await Promise.all(oldBudgetNotifs.map(n =>
+                    fetch(`/api/notifications/${n.id}`, { method: "DELETE", credentials: "include" })
+                ));
+                await postNotification(
+                    `Almost reached budget - monthly costs (${monthly.toFixed(2)} €) reach ${Math.round((monthly / budget) * 100)}% of your budget (${budget.toFixed(2)} €)`
+                );
             }
         }
     } finally {
@@ -90,7 +92,7 @@ function NotificationsPage({ onCountChange }) {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    //Lädt Noti. vom Backend, dreht die Liste um (damit neuste oben steht)
+    {/* Loads notification from the backend, shows the newest notification at the top */}
     function loadNotifications() {
         fetch("/api/notifications", { credentials: "include" })
             .then(r => r.ok ? r.json() : [])
@@ -102,7 +104,7 @@ function NotificationsPage({ onCountChange }) {
             .catch(() => { setNotifications([]); onCountChange?.(0); })
             .finally(() => setLoading(false));
     }
-    //Schaut ob eine neue Notification erstellt werden muss
+    {/* Checks if a new notification needs to be created */}
     useEffect(() => {
         loadNotifications();
     }, []);
@@ -120,13 +122,13 @@ function NotificationsPage({ onCountChange }) {
             {loading ? (
                 <p className="t-muted text-sm">Loading…</p>
             ) : notifications.length === 0 ? (
-                <p className="t-muted text-sm">Keine Notifications.</p>
+                <p className="t-muted text-sm">No new notifications.</p>
             ) : (
-                <div className="card p-6">
+                <div className="flex flex-col gap-2">
                     {notifications.map(n => (
-                        <div key={n.id} className="flex items-center justify-between py-3 border-b border-gray-700/50 last:border-0">
+                        <div key={n.id} className="card rounded-xl p-6 flex items-center justify-between py-3">
                             <div className="flex items-center gap-3">
-                                <img src={alertIcon} alt="alert" className="icon icon-alert w-5 h-5 shrink-0" />
+                                <AlertIcon className="icon icon-alert shrink-0" />
                                 <div>
                                     <p className="text-sm t-primary">{n.message}</p>
                                     <p className="text-xs t-muted mt-0.5">{n.date}</p>
@@ -134,7 +136,7 @@ function NotificationsPage({ onCountChange }) {
                             </div>
                             <button
                                 onClick={() => handleDelete(n.id)}
-                                className="text-xs t-muted hover:t-error ml-4 shrink-0"
+                                className="btn-close"
                             >
                                 ✕
                             </button>

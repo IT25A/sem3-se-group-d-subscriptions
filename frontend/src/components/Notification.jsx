@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import megaphoneIcon from "../../assets/megaphone.svg";
+import { MegaphoneIcon } from "../assets/icons.jsx";
 
 export function Notification({ message, onDone }) {
   const [visible, setVisible] = useState(false);
@@ -22,7 +22,7 @@ export function Notification({ message, onDone }) {
 
   return (
     <div className={`notification${visible ? " notification--visible" : ""}`}>
-      <img src={megaphoneIcon} alt="" className="icon icon-white" />
+      <MegaphoneIcon className="icon icon-white" />
       {text}
     </div>
   );

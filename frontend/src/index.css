@@ -131,26 +131,25 @@ body {
         text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700;
     }
 
-    /* ── Icon filters ────────────────────────────────────────── */
+    /* ── Icon styles ─────────────────────────────────────────── */
     .icon {
         @apply w-5 h-5;
     }
-    .icon-white,
-    .icon-delete,
-    .icon-edit {
-        filter: brightness(0) invert(1);
+    .icon-white {
+        color: white;
     }
     .icon-delete,
     .icon-edit {
         @apply transform hover:scale-95 cursor-pointer;
+        color: white;
         transition: 0.25s;
     }
     .icon-alert,
     .icon-delete:hover {
-        filter: brightness(0) saturate(100%) invert(23%) sepia(39%) saturate(6325%) hue-rotate(345deg) brightness(112%) contrast(97%);
+        @apply text-red-500;
     }
     .icon-edit:hover {
-        filter: invert(47%) sepia(5%) saturate(1445%) hue-rotate(182deg) brightness(91%) contrast(79%);
+        @apply text-gray-500;
     }
 
     /* ── Pill chips (category/sort filters) ──────────────────── */

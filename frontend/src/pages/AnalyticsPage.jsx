@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
-import Modal from "../../components/ui/Modal";
-import monthIcon from "../../assets/calendar-1.svg";
-import yearIcon from "../../assets/calendar-2.svg";
-import walletIcon from "../../assets/wallet.svg";
-import subscriptionIcon from "../../assets/currency.svg";
-import alertIcon from "../../assets/alert.svg";
+import Modal from "../components/Modal.jsx";
+import { CalendarMonthIcon, CalendarYearIcon, WalletIcon, CurrencyIcon, AlertIcon } from "../assets/icons.jsx";
 
 const PRESET_COLORS = {
     "Video-Streaming": "#228B22",
@@ -38,14 +34,14 @@ function formatPrice(value, smallCents) {
     );
 }
 
-function StatCard({ icon, label, value }) {
+function StatCard({ icon: Icon, label, value }) {
     return (
         <div className="card p-6 flex items-center gap-4">
             <div
                 className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
                 style={{ background: "var(--gradient-emerald)" }}
             >
-                <img src={icon} alt={label} className="icon icon-white" />
+                <Icon className="icon icon-white" />
             </div>
             <div>
                 <p className="text-xs t-muted mb-1">{label}</p>
@@ -85,7 +81,7 @@ function PaymentRow({ name, category, price, payDay }) {
             <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium t-primary truncate">{name}</p>
                 <p className="text-xs t-muted mt-0.5">
-                    {category} · Fällig am: {payDay}. {new Date().toLocaleString("de-DE", { month: "long" })}
+                    {category} · Due: {payDay}. {new Date().toLocaleString("de-DE", { month: "long" })}
                 </p>
             </div>
             <p className="text-sm font-semibold t-accent shrink-0 ml-3">
@@ -172,22 +168,22 @@ useEffect(() => {
             {/* Overview widgets */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                 <StatCard
-                    icon={monthIcon}
+                    icon={CalendarMonthIcon}
                     label="Monthly costs"
                     value={loading ? "…" : <>{formatPrice(monthly, true)} €</>}
                 />
                 <StatCard
-                    icon={yearIcon}
+                    icon={CalendarYearIcon}
                     label="Yearly costs"
                     value={loading ? "…" : <>{formatPrice(yearly, true)} €</>}
                 />
                 <StatCard
-                    icon={subscriptionIcon}
+                    icon={CurrencyIcon}
                     label="Total subscriptions"
                     value={loading ? "…" : count}
                 />
                 <StatCard
-                    icon={walletIcon}
+                    icon={WalletIcon}
                     label="Avg. cost / subscription"
                     value={loading ? "…" : <>{formatPrice(avgCost, true)} €</>}
                 />
@@ -259,7 +255,7 @@ useEffect(() => {
                                 </div>
                                 <p className={`text-sm font-semibold flex items-center ${budgetUsedPct >= 95 ? "t-error" : budgetUsedPct >= 75 ? "t-alert" : "t-success"}`}>
                                     {budgetUsedPct > 100
-                                        ? <><img src={alertIcon} alt={"alert"} className="icon icon-alert mr-2" /> Budget exceeded by {formatPrice(monthly - Number(budget))} €</>
+                                        ? <><AlertIcon className="icon icon-alert mr-2" /> Budget exceeded by {formatPrice(monthly - Number(budget))} €</>
                                         : `${budgetUsedPct}% of budget used`}
                                 </p>
                             </>
@@ -332,7 +328,7 @@ useEffect(() => {
 
             {/* Monthly payment schedule */}
             {!loading && subscriptions.length > 0 && (
-                <div className="card p-6 mt-4 lg:w-1/2">
+                <div className="card p-6 mt-4">
                     <h3 className="text-xl font-semibold t-primary mb-4">Monthly payments</h3>
                     {upcomingSorted.map((s) => (
                         <PaymentRow

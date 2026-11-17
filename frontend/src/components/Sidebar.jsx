@@ -1,23 +1,17 @@
 import { useState } from "react";
-import logoImg from "../../assets/logo.png";
-import settingsIcon from "../../assets/cog.svg";
-import logoutIcon from "../../assets/logout.svg";
-import dashboardIcon from "../../assets/dashboard.svg";
-import subscriptionIcon from "../../assets/currency.svg";
-import analyticsIcon from "../../assets/chart.svg";
-import compareIcon from "../../assets/compare.svg";
-import notificationIcon from "../../assets/notification.svg";
-import Modal from "../ui/Modal.jsx";
-import Settings from "../../pages/Settings/Settings.jsx";
+import logoImg from "../assets/logo.png";
+import { CogIcon, LogoutIcon, DashboardIcon, CurrencyIcon, ChartIcon, CompareIcon, NotificationIcon } from "../assets/icons.jsx";
+import Modal from "./Modal.jsx";
+import Settings from "../pages/Settings.jsx";
 
 function Sidebar({ user, onLogout, activePage, onNavigate, notificationCount = 0 }) {
     const [showSettings, setShowSettings] = useState(false);
     const navItems = [
-        { icon: dashboardIcon, label: "Dashboard" },
-        { icon: subscriptionIcon, label: "Subscriptions" },
-        { icon: analyticsIcon, label: "Analytics" },
-        { icon: compareIcon, label: "Compare" },
-        { icon: notificationIcon, label: "Notifications" },
+        { icon: DashboardIcon, label: "Dashboard" },
+        { icon: CurrencyIcon, label: "Subscriptions" },
+        { icon: ChartIcon, label: "Analytics" },
+        { icon: CompareIcon, label: "Compare" },
+        { icon: NotificationIcon, label: "Notifications" },
     ];
 
     return (
@@ -36,9 +30,9 @@ function Sidebar({ user, onLogout, activePage, onNavigate, notificationCount = 0
                             className={activePage === item.label ? "sidebar-nav-item active" : "sidebar-nav-item"}
                         >
                             <span className="relative inline-flex">
-                                <img src={item.icon} alt={item.label} className="icon icon-white"/>
+                                <item.icon className="icon icon-white" />
                                 {item.label === "Notifications" && notificationCount > 0 && (
-                                    <span className="absolute bottom-0 -right-1 w-2 h-2 rounded-full bg-red-500" />
+                                    <span className="absolute top-px right-px w-1.5 h-1.5 rounded-full bg-red-500" />
                                 )}
                             </span>
                             {item.label}
@@ -55,10 +49,10 @@ function Sidebar({ user, onLogout, activePage, onNavigate, notificationCount = 0
                     </div>
                     <div className="flex gap-2">
                         <button className="btn btn-secondary" title="Settings" onClick={() => setShowSettings(true)}>
-                            <img src={settingsIcon} alt="Settings" className="icon icon-white" />
+                            <CogIcon className="icon icon-white" />
                         </button>
                         <button className="btn btn-secondary" onClick={onLogout} title="Logout">
-                            <img src={logoutIcon} alt="Logout" className="icon icon-white" />
+                            <LogoutIcon className="icon icon-white" />
                         </button>
                     </div>
                 </div>

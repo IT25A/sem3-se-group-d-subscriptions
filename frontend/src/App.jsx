@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import AuthPage from "./pages/Auth/AuthPage.jsx";
-import SubscriptionList from "./pages/Dashboard/SubscriptionList.jsx";
-import Dashboard from "./pages/Dashboard/Dashboard.jsx";
-import Analytics from "./pages/Analytics/AnalyticsPage.jsx";
-import ComparisonPage from "./pages/Comparison/ComparisonPage.jsx";
-import Sidebar from "./components/layout/Sidebar.jsx";
-import { Notification } from "./components/ui/Notification.jsx";
-import NotificationsPage, { checkAndCreateNotifications } from "./pages/Notifications/NotificationsPage.jsx";
+import AuthPage from "./pages/AuthPage.jsx";
+import SubscriptionList from "./components/SubscriptionList.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
+import Analytics from "./pages/AnalyticsPage.jsx";
+import ComparisonPage from "./pages/ComparisonPage.jsx";
+import Sidebar from "./components/Sidebar.jsx";
+import { Notification } from "./components/Notification.jsx";
+import NotificationsPage, { checkAndCreateNotifications } from "./pages/NotificationsPage.jsx";
 
 function App() {
     const [user, setUser] = useState(null);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ConfirmationModal from "../../components/ui/ConfirmationModal.jsx";
+import ConfirmationModal from "../components/ConfirmationModal.jsx";
 
 function Settings({ onAccountDeleted }) {
     const [showConfirm, setShowConfirm] = useState(false);

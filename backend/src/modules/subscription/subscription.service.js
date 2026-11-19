@@ -16,8 +16,10 @@ async function createSubscription({ userId, subscription, price, category, date 
 }
 
 async function getSubscription({ userId }) {
-    return await all("SELECT id, subscription, price, category, date FROM SubscriptionModel WHERE userid = ?",
-        [userId])
+    return await all(
+        "SELECT id, subscription, price, category, date FROM SubscriptionModel WHERE userid = ?",
+        [userId]
+    );
 }
 
 async function deleteSubscription({ userId, id }) {

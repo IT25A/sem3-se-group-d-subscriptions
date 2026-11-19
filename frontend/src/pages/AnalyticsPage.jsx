@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
-import Modal from "../../components/ui/Modal";
-import monthIcon from "../../assets/calendar-1.svg";
-import yearIcon from "../../assets/calendar-2.svg";
-import walletIcon from "../../assets/wallet.svg";
-import subscriptionIcon from "../../assets/currency.svg";
-import alertIcon from "../../assets/alert.svg";
+import Modal from "../components/Modal.jsx";
+import { CalendarMonthIcon, CalendarYearIcon, WalletIcon, CurrencyIcon, AlertIcon } from "../assets/icons.jsx";
 
 const PRESET_COLORS = {
     "Video-Streaming": "#228B22",
@@ -38,14 +34,14 @@ function formatPrice(value, smallCents) {
     );
 }
 
-function StatCard({ icon, label, value }) {
+function StatCard({ icon: Icon, label, value }) {
     return (
         <div className="card p-6 flex items-center gap-4">
             <div
                 className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
                 style={{ background: "var(--gradient-emerald)" }}
             >
-                <img src={icon} alt={label} className="icon icon-white" />
+                <Icon className="icon icon-white" />
             </div>
             <div>
                 <p className="text-xs t-muted mb-1">{label}</p>
@@ -79,6 +75,24 @@ function CategoryBar({ label, amount, pct, color }) {
     );
 }
 
+function PaymentRow({ name, category, price, payDay }) {
+    return (
+        <div className="flex items-center justify-between py-3 border-b border-gray-700/50 last:border-0">
+            <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium t-primary truncate">{name}</p>
+                <p className="text-xs t-muted mt-0.5">
+                    {category} · Due: {payDay}. {new Date().toLocaleString("de-DE", { month: "long" })}
+                </p>
+            </div>
+            <p className="text-sm font-semibold t-accent shrink-0 ml-3">
+                {formatPrice(price)} €
+            </p>
+        </div>
+    );
+}
+
+
+
 function CategoryChartModal({ byCategory, allCategories, monthly, onClose }) {
     return (
         <Modal isOpen onClose={onClose} title="All categories" size="max-w-2xl">
@@ -103,7 +117,7 @@ function Analytics({ budget, refresh }) {
     const [error, setError] = useState(null);
     const [showAllCategories, setShowAllCategories] = useState(false);
 
-    useEffect(() => {
+useEffect(() => {
         setLoading(true);
         fetch("/api/subscriptions", { credentials: "include" })
             .then((res) => {
@@ -140,6 +154,11 @@ function Analytics({ budget, refresh }) {
         ? [...subscriptions].sort((a, b) => Number(b.price) - Number(a.price))[0]
         : null;
 
+    const upcomingSorted = [...subscriptions]
+        .filter((s) => s.date)
+        .map((s) => ({ ...s, payDay: new Date(s.date).getDate() }))
+        .sort((a, b) => a.payDay - b.payDay);
+
     return (
         <div className="container-md mt-6 pb-10">
             <h2 className="text-xl font-semibold t-primary mb-4">Analytics</h2>
@@ -149,22 +168,22 @@ function Analytics({ budget, refresh }) {
             {/* Overview widgets */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                 <StatCard
-                    icon={monthIcon}
+                    icon={CalendarMonthIcon}
                     label="Monthly costs"
                     value={loading ? "…" : <>{formatPrice(monthly, true)} €</>}
                 />
                 <StatCard
-                    icon={yearIcon}
+                    icon={CalendarYearIcon}
                     label="Yearly costs"
                     value={loading ? "…" : <>{formatPrice(yearly, true)} €</>}
                 />
                 <StatCard
-                    icon={subscriptionIcon}
+                    icon={CurrencyIcon}
                     label="Total subscriptions"
                     value={loading ? "…" : count}
                 />
                 <StatCard
-                    icon={walletIcon}
+                    icon={WalletIcon}
                     label="Avg. cost / subscription"
                     value={loading ? "…" : <>{formatPrice(avgCost, true)} €</>}
                 />
@@ -236,7 +255,7 @@ function Analytics({ budget, refresh }) {
                                 </div>
                                 <p className={`text-sm font-semibold flex items-center ${budgetUsedPct >= 95 ? "t-error" : budgetUsedPct >= 75 ? "t-alert" : "t-success"}`}>
                                     {budgetUsedPct > 100
-                                        ? <><img src={alertIcon} alt={"alert"} className="icon icon-alert mr-2" /> Budget exceeded by {formatPrice(monthly - Number(budget))} €</>
+                                        ? <><AlertIcon className="icon icon-alert mr-2" /> Budget exceeded by {formatPrice(monthly - Number(budget))} €</>
                                         : `${budgetUsedPct}% of budget used`}
                                 </p>
                             </>
@@ -304,6 +323,22 @@ function Analytics({ budget, refresh }) {
                             </tbody>
                         </table>
                     </div>
+                </div>
+            )}
+
+            {/* Monthly payment schedule */}
+            {!loading && subscriptions.length > 0 && (
+                <div className="card p-6 mt-4">
+                    <h3 className="text-xl font-semibold t-primary mb-4">Monthly payments</h3>
+                    {upcomingSorted.map((s) => (
+                        <PaymentRow
+                            key={s.id}
+                            name={s.subscription}
+                            category={s.category}
+                            price={Number(s.price)}
+                            payDay={s.payDay}
+                        />
+                    ))}
                 </div>
             )}
         </div>

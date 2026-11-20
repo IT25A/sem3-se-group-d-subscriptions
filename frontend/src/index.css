@@ -217,6 +217,12 @@ body {
     .sidebar-username {
         @apply text-sm font-medium truncate text-white;
     }
+    .sidebar-hamburger {
+        display: none;
+    }
+    .sidebar-overlay {
+        display: none;
+    }
 
     /* ── Main content area ───────────────────────────────────── */
     .main-content {
@@ -228,5 +234,70 @@ body {
     }
     .footer-note{
         @apply mt-8 text-sm text-white;
+    }
+}
+
+/* ── Responsive: icon-only sidebar between 768px and 1024px ─── */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .sidebar {
+        @apply w-20 p-3 items-center;
+    }
+    .sidebar-logo-text,
+    .sidebar-nav-label,
+    .sidebar-username {
+        @apply hidden;
+    }
+    .sidebar-logo {
+        @apply justify-center;
+    }
+    .sidebar-nav-item {
+        @apply justify-center w-auto px-4 py-2;
+    }
+    .sidebar-footer {
+        @apply flex-col items-center gap-3;
+    }
+    .sidebar-user {
+        @apply justify-center;
+    }
+    .sidebar-options {
+        @apply flex-col;
+    }
+    .main-content {
+        margin-left: 5rem;
+    }
+}
+
+/* ── Responsive: hamburger sidebar below 768px ─────────────── */
+@media (max-width: 768px) {
+    .sidebar-logo {
+        @apply mt-16;
+    }
+    .sidebar-hamburger {
+        @apply flex items-center justify-center fixed top-4 left-4 z-50 w-10 h-10 rounded-xl bg-gray-800 text-white border border-gray-700 cursor-pointer;
+        box-shadow: var(--element-box-shadow);
+        transition: background 0.2s;
+    }
+    .sidebar-hamburger:hover {
+        @apply bg-gray-700;
+    }
+
+    .sidebar-overlay {
+        @apply block fixed inset-0 bg-black/60 z-20 backdrop-blur-xs;
+    }
+
+    .sidebar {
+        @apply w-70 z-30;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    .sidebar--open {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        @apply ml-0 pt-20;
+    }
+    .comparison-card {
+        @apply flex-col h-auto;
     }
 }

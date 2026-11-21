@@ -5,7 +5,7 @@
 
   **Track, manage, and optimize your subscriptions — all in one place.**
 
-  ![Node](https://img.shields.io/badge/node-%3E%3D18-green)
+  ![Node](https://img.shields.io/badge/node-%3E%3D23-green)
   ![Stack](https://img.shields.io/badge/stack-Express%20%2B%20React-blueviolet)
   ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 </div>
@@ -27,7 +27,7 @@
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) v18 or higher
+- [Node.js](https://nodejs.org/) v23 or higher
 - [npm](https://www.npmjs.com/)
 
 ### 1. Install dependencies

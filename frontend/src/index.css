@@ -66,15 +66,10 @@ body {
         box-shadow: var(--element-box-shadow);
     }
     .notification {
-        @apply flex items-center text-center gap-4 rounded-2xl text-white;
-        position: fixed;
-        top: 1.5rem;
-        right: 1.5rem;
+        @apply flex items-center fixed top-6 right-6 px-5 py-3 max-w-xs text-center gap-4 rounded-2xl text-white;
         transform: translateX(150%);
         transition: transform 0.4s ease;
-        padding: 0.75rem 1.25rem;
         z-index: 9999;
-        max-width: 320px;
         background: #1f2937;
         box-shadow: var(--element-box-shadow);
     }
@@ -171,13 +166,8 @@ body {
 
     /* ── Sidebar ─────────────────────────────────────────────── */
     .sidebar {
-        @apply bg-gray-800 border-r border-r-gray-700 flex flex-col gap-6 p-6;
-        position: fixed;
-        top: 0;
-        left: 0;
+        @apply fixed top-0 left-0 h-screen overflow-y-auto bg-gray-800 border-r border-r-gray-700 flex flex-col gap-6 p-6;
         width: 20%;
-        height: 100vh;
-        overflow-y: auto;
         backdrop-filter: blur(8px);
         z-index: 10;
     }
@@ -240,7 +230,7 @@ body {
 /* ── Responsive: icon-only sidebar between 768px and 1024px ─── */
 @media (min-width: 769px) and (max-width: 1024px) {
     .sidebar {
-        @apply w-20 p-3 items-center;
+        @apply w-20 p-3 items-center overflow-visible;
     }
     .sidebar-logo-text,
     .sidebar-nav-label,
@@ -251,7 +241,17 @@ body {
         @apply justify-center;
     }
     .sidebar-nav-item {
-        @apply justify-center w-auto px-4 py-2;
+        @apply justify-center w-auto px-4 py-2 relative;
+    }
+    .sidebar-nav-item .sidebar-nav-label {
+        @apply block absolute top-1/2 -translate-y-1/2 -translate-x-1 bg-gray-800 text-white text-sm font-medium whitespace-nowrap px-2.5 py-1 rounded-lg opacity-0 pointer-events-none;
+        left: calc(100% + 0.75rem);
+        box-shadow: var(--element-box-shadow);
+        transition: opacity 0.15s ease, transform 0.15s ease;
+        z-index: 100;
+    }
+    .sidebar-nav-item:hover .sidebar-nav-label {
+        @apply opacity-100 translate-x-0 -translate-y-1/2;
     }
     .sidebar-footer {
         @apply flex-col items-center gap-3;
@@ -263,7 +263,7 @@ body {
         @apply flex-col;
     }
     .main-content {
-        margin-left: 5rem;
+        @apply ml-20;
     }
 }
 

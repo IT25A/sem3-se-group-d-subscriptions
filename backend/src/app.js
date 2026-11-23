@@ -1,4 +1,5 @@
 require("dotenv").config({ path: require("path").resolve(__dirname, "../../.env") });
+const db = require("./database");
 const express = require("express");
 const session = require("express-session")
 const cors = require("cors");
@@ -25,5 +26,15 @@ app.use("/api/auth", authRouter);
 app.use("/api/subscriptions", subscriptionRouter);
 app.use("/api/webscraper", webscraperRouter);
 app.use("/api/notifications", notificationRouter);
+
+app.get("/api/health", async (_req, res) => {
+	try {
+		await db.run("SELECT 1");
+		res.json({ status: "ok" });
+	} catch (err) {
+		console.error("Database health check failed:", err);
+		res.status(500).json({ status: "error", message: "Database health check failed" });
+	}
+});
 
 module.exports = app;

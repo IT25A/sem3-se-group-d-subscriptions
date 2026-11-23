@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/IT25A/deploy-workflows/main/schema/it25a.schema.json
+# React frontend and Express backend with an SQLite database file, on ONE address:
+#   https://<alias>.apps.it25a.de        -> frontend
+#   https://<alias>.apps.it25a.de/api    -> backend (stores its data in the SQLite file)
+version: 1
+services:
+  web:
+    build: ./frontend
+    port: 3000
+    route: { host: "@" }
+  api:
+    build: ./backend
+    port: 3000
+    route: { host: "@", path: /api }
+    volumes: ["db-data:/data"]       # a folder that survives updates: name:folder in the container
+    environment:
+      DB_PATH: /data/app.sqlite      # the file lies in the volume "db-data"
+    secrets: [SESSION_SECRET]        # uncomment if the backend needs secrets

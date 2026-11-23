@@ -59,7 +59,7 @@ body {
 
     /* ── Surfaces ────────────────────────────────────────────── */
     .card {
-        @apply bg-white dark:bg-gray-800 rounded-3xl shadow;
+        @apply bg-gray-800 rounded-3xl shadow;
         transition: box-shadow 200ms ease-in-out;
     }
     .card:hover {
@@ -83,14 +83,14 @@ body {
     }
 
     /* ── Typography ──────────────────────────────────────────── */
-    .t-primary   { @apply text-gray-900 dark:text-white; }
-    .t-secondary { @apply text-gray-600 dark:text-gray-300; }
-    .t-muted     { @apply text-gray-500 dark:text-gray-400; }
+    .t-primary   { @apply text-white; }
+    .t-secondary { @apply text-gray-300; }
+    .t-muted     { @apply text-gray-400; }
     .t-faint     { @apply text-gray-400; }
-    .t-accent    { @apply text-emerald-800 dark:text-emerald-700; }
+    .t-accent    { @apply text-emerald-700; }
     .t-error     { @apply text-red-500; }
     .t-alert     { @apply text-yellow-400; }
-    .t-success   { @apply text-green-600 dark:text-green-400; }
+    .t-success   { @apply text-green-400; }
 
     /* ── Buttons ─────────────────────────────────────────────── */
     .btn {
@@ -120,9 +120,8 @@ body {
 
     /* ── Form controls ───────────────────────────────────────── */
     .input-field {
-        @apply border border-gray-300 dark:border-gray-600
-        rounded-xl px-3 py-2
-        bg-white dark:bg-gray-700 dark:text-white
+        @apply border border-gray-600
+        rounded-xl px-3 py-2 bg-gray-700 text-white
         text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700;
     }
 
